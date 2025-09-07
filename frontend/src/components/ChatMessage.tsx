@@ -271,9 +271,24 @@ const ChatMessage: React.FC<Props> = (props) => {
                   if (content.contentType === 'text') {
                     return (
                       <React.Fragment key={idx}>
-                        {content.body.split('\n').map((c, idxBody) => (
-                          <div key={idxBody} className={chatContent?.role === 'user' ? 'text-right' : ''}>{c}</div>
-                        ))}
+                        <div className={`group relative ${chatContent?.role === 'user' ? 'text-right' : ''}`}>
+                          {chatContent?.role === 'user' && !isEdit && (
+                            <ButtonIcon
+                              className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-dark-gray dark:text-light-gray"
+                              onClick={() => {
+                                const textContent = chatContent.content[
+                                  firstTextContent
+                                ] as TextContent;
+                                setChangedContent(textContent.body);
+                                setIsEdit(true);
+                              }}>
+                              <PiNotePencil />
+                            </ButtonIcon>
+                          )}
+                          {content.body.split('\n').map((c, idxBody) => (
+                            <div key={idxBody} className={chatContent?.role === 'user' ? 'text-right' : ''}>{c}</div>
+                          ))}
+                        </div>
                       </React.Fragment>
                     );
                   }
@@ -342,19 +357,6 @@ const ChatMessage: React.FC<Props> = (props) => {
 
       <div className={`col-span-2 ${chatContent?.role === 'user' ? 'col-start-1' : 'col-start-11'}`}>
         <div className={`flex flex-col ${chatContent?.role === 'user' ? 'items-start' : 'items-end lg:items-start'}`}>
-          {chatContent?.role === 'user' && !isEdit && (
-            <ButtonIcon
-              className="text-dark-gray dark:text-light-gray"
-              onClick={() => {
-                const textContent = chatContent.content[
-                  firstTextContent
-                ] as TextContent;
-                setChangedContent(textContent.body);
-                setIsEdit(true);
-              }}>
-              <PiNotePencil />
-            </ButtonIcon>
-          )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
               <ButtonIcon

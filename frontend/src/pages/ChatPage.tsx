@@ -602,7 +602,7 @@ const ChatPage: React.FC = () => {
                         className={`w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6 my-2 rounded-xl ${
                           message.role === 'assistant'
                             ? 'bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
-                            : 'bg-gray-50 dark:bg-gray-800/30'
+                            : 'bg-gray-200 dark:bg-gray-600/60'
                         }`}>
                         <ChatMessageWithRelatedDocuments
                           chatContent={message}

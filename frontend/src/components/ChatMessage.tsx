@@ -353,19 +353,6 @@ const ChatMessage: React.FC<Props> = (props) => {
         </div>
         
         <div className="flex flex-col items-end ml-4">
-          {chatContent?.role === 'user' && !isEdit && (
-            <ButtonIcon
-              className="text-dark-gray dark:text-light-gray"
-              onClick={() => {
-                const textContent = chatContent.content[
-                  firstTextContent
-                ] as TextContent;
-                setChangedContent(textContent.body);
-                setIsEdit(true);
-              }}>
-              <PiNotePencil />
-            </ButtonIcon>
-          )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
               <ButtonIcon

@@ -597,25 +597,25 @@ const ChatPage: React.FC = () => {
               ) : (
                 <>
                   {messages?.map((message, idx, array) => (
-                    <div
-                      key={idx}
-                      className={`${
-                        message.role === 'assistant'
-                          ? 'bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
-                          : ''
-                      }`}>
-                      <ChatMessageWithRelatedDocuments
-                        chatContent={message}
-                        isStreaming={postingMessage && idx + 1 === array.length}
-                        onChangeMessageId={onChangeCurrentMessageId}
-                        onSubmit={onSubmitEditedContent}
-                        onSubmitFeedback={(messageId, feedback) => {
-                          if (conversationId) {
-                            giveFeedback(messageId, feedback);
-                          }
-                        }}
-                      />
-                      <div className="w-full border-b border-aws-squid-ink-light/10 dark:border-aws-squid-ink-dark/10"></div>
+                    <div key={idx} className="flex justify-center">
+                      <div
+                        className={`w-full max-w-4xl ${
+                          message.role === 'assistant'
+                            ? 'mx-4 my-2 rounded-xl bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
+                            : 'mx-4 my-2'
+                        }`}>
+                        <ChatMessageWithRelatedDocuments
+                          chatContent={message}
+                          isStreaming={postingMessage && idx + 1 === array.length}
+                          onChangeMessageId={onChangeCurrentMessageId}
+                          onSubmit={onSubmitEditedContent}
+                          onSubmitFeedback={(messageId, feedback) => {
+                            if (conversationId) {
+                              giveFeedback(messageId, feedback);
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </>

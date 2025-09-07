@@ -152,10 +152,10 @@ const ChatMessage: React.FC<Props> = (props) => {
   );
 
   return (
-    <div className={twMerge(props.className, 'grid grid-cols-12 gap-2 p-3')}>
-      <div className="col-start-1 lg:col-start-2 ">
+    <div className={twMerge(props.className, 'flex flex-col gap-2 px-2 py-3')}>
+      <div className="flex justify-start">
         {(chatContent?.sibling.length ?? 0) > 1 && (
-          <div className="flex items-center justify-start text-sm lg:justify-end">
+          <div className="flex items-center justify-start text-sm">
             <ButtonIcon
               className="text-xs"
               disabled={nodeIndex === 0}
@@ -179,10 +179,8 @@ const ChatMessage: React.FC<Props> = (props) => {
         )}
       </div>
 
-      <div className={`order-first col-span-12 flex lg:order-none lg:col-span-8 lg:col-start-3 ${
-        chatContent?.role === 'user' ? 'flex-row-reverse' : ''
-      }`}>
-        <div className="grow">
+      <div className="flex w-full">
+        <div className="flex-1">
           {chatContent?.role == 'assistant' && reasoning?.content && (
             <ReasoningCard
               content={reasoning.content}
@@ -353,10 +351,21 @@ const ChatMessage: React.FC<Props> = (props) => {
             </ChatMessageMarkdown>
           )}
         </div>
-      </div>
-
-      <div className={`col-span-2 ${chatContent?.role === 'user' ? 'col-start-1' : 'col-start-11'}`}>
-        <div className={`flex flex-col ${chatContent?.role === 'user' ? 'items-start' : 'items-end lg:items-start'}`}>
+        
+        <div className="flex flex-col items-end ml-4">
+          {chatContent?.role === 'user' && !isEdit && (
+            <ButtonIcon
+              className="text-dark-gray dark:text-light-gray"
+              onClick={() => {
+                const textContent = chatContent.content[
+                  firstTextContent
+                ] as TextContent;
+                setChangedContent(textContent.body);
+                setIsEdit(true);
+              }}>
+              <PiNotePencil />
+            </ButtonIcon>
+          )}
           {chatContent?.role === 'assistant' && (
             <div className="flex">
               <ButtonIcon

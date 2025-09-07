@@ -4,7 +4,7 @@ export default {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      body: ['M PLUS Rounded 1c'],
+      body: ['Inter', 'sans-serif'],
     },
     extend: {
       transitionProperty: {

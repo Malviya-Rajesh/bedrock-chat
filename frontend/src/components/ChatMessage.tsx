@@ -286,7 +286,7 @@ const ChatMessage: React.FC<Props> = (props) => {
                             </ButtonIcon>
                           )}
                           {content.body.split('\n').map((c, idxBody) => (
-                            <div key={idxBody} className={chatContent?.role === 'user' ? 'text-right' : ''}>{c}</div>
+                            <div key={idxBody} className={`font-bold ${chatContent?.role === 'user' ? 'text-right' : ''}`}>{c}</div>
                           ))}
                         </div>
                       </React.Fragment>
@@ -324,7 +324,7 @@ const ChatMessage: React.FC<Props> = (props) => {
           {isEdit && (
             <div>
               <Textarea
-                className={`bg-transparent ${chatContent?.role === 'user' ? 'text-right' : ''}`}
+                className={`bg-transparent font-bold ${chatContent?.role === 'user' ? 'text-right' : ''}`}
                 value={changedContent}
                 noBorder
                 onChange={(v) => setChangedContent(v)}
@@ -343,6 +343,7 @@ const ChatMessage: React.FC<Props> = (props) => {
           )}
           {chatContent?.role === 'assistant' && (
             <ChatMessageMarkdown
+              className="font-bold"
               isStreaming={props.isStreaming}
               relatedDocuments={relatedDocuments}
               messageId={chatContent.id}>

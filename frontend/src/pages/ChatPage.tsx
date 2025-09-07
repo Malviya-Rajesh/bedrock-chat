@@ -553,11 +553,6 @@ const ChatPage: React.FC = () => {
               </div>
             )}
           </div>
-          {getPostedModel() && (
-            <div className="absolute right-2 top-10 text-xs text-dark-gray dark:text-light-gray">
-              model: {getPostedModel()}
-            </div>
-          )}
         </div>
         <section className="relative size-full flex-1 overflow-auto pb-9">
           <div className="h-full">
@@ -607,7 +602,7 @@ const ChatPage: React.FC = () => {
                           className={`w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6 my-2 ${
                             message.role === 'assistant'
                               ? ''
-                              : 'bg-gray-600 dark:bg-gray-700 rounded-xl p-4'
+                              : 'bg-gray-100 dark:bg-gray-800 rounded-xl p-4'
                           }`}>
                           <ChatMessageWithRelatedDocuments
                             chatContent={message}

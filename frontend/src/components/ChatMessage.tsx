@@ -275,7 +275,7 @@ const ChatMessage: React.FC<Props> = (props) => {
                         <div className={`group relative ${chatContent?.role === 'user' ? 'text-right' : ''}`}>
                           {chatContent?.role === 'user' && !isEdit && (
                             <ButtonIcon
-                              className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-dark-gray dark:text-light-gray"
+                              className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-dark-gray dark:text-light-gray"
                               onClick={() => {
                                 const textContent = chatContent.content[
                                   firstTextContent

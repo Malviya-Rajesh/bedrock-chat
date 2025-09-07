@@ -479,7 +479,7 @@ const InputChatContent = forwardRef<HTMLElement, Props>(
           <div className="flex w-full">
             <Textarea
               key={`textarea-${props.isNewChat}`} // Add a key to force re-render
-              className="m-1 bg-transparent pr-12 scrollbar-thin scrollbar-thumb-light-gray"
+              className="m-1 bg-gray-50 dark:bg-gray-800 pr-12 scrollbar-thin scrollbar-thumb-light-gray rounded-lg"
               placeholder={t('app.inputMessage')}
               disabled={props.disabled}
               noBorder

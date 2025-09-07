@@ -7,6 +7,7 @@ import {
   PiNotePencil,
   PiThumbsDown,
   PiThumbsDownFill,
+  PiArrowsCounterClockwise,
 } from 'react-icons/pi';
 import { BaseProps } from '../@types/common';
 import {
@@ -40,6 +41,8 @@ type Props = BaseProps & {
   onChangeMessageId?: (messageId: string) => void;
   onSubmit?: (messageId: string, content: string) => void;
   onSubmitFeedback?: (messageId: string, feedback: PutFeedbackRequest) => void;
+  onRegenerate?: () => void;
+  isLastMessage?: boolean;
 };
 
 const ChatMessage: React.FC<Props> = (props) => {
@@ -350,11 +353,17 @@ const ChatMessage: React.FC<Props> = (props) => {
                 .join('\n')}
             </ChatMessageMarkdown>
           )}
-        </div>
-        
-        <div className="flex flex-col items-end ml-4">
+          
+          {/* Add buttons at the bottom for AI messages */}
           {chatContent?.role === 'assistant' && (
-            <div className="flex">
+            <div className="flex justify-end mt-2 gap-2">
+              {props.onRegenerate && (
+                <ButtonIcon
+                  className="text-dark-gray dark:text-light-gray"
+                  onClick={props.onRegenerate}>
+                  <PiArrowsCounterClockwise />
+                </ButtonIcon>
+              )}
               <ButtonIcon
                 className="text-dark-gray dark:text-light-gray"
                 onClick={() => setIsFeedbackOpen(true)}>

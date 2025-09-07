@@ -339,6 +339,8 @@ const ChatPage: React.FC = () => {
       messageId: string,
       feedback: PutFeedbackRequest
     ) => void;
+    onRegenerate?: () => void;
+    isLastMessage?: boolean;
   }> = React.memo((props) => {
     const { chatContent: message } = props;
 
@@ -431,6 +433,8 @@ const ChatPage: React.FC = () => {
         onChangeMessageId={props.onChangeMessageId}
         onSubmit={props.onSubmit}
         onSubmitFeedback={props.onSubmitFeedback}
+        onRegenerate={props.onRegenerate}
+        isLastMessage={props.isLastMessage}
       />
     );
   });
@@ -600,10 +604,10 @@ const ChatPage: React.FC = () => {
                     <div key={idx} className="flex flex-col items-center">
                       <div className="flex justify-center w-full">
                         <div
-                          className={`w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6 my-2 rounded-xl ${
+                          className={`w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6 my-2 ${
                             message.role === 'assistant'
-                              ? 'bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
-                              : 'bg-gray-200 dark:bg-gray-600/60'
+                              ? ''
+                              : 'bg-gray-600 dark:bg-gray-700 rounded-xl p-4'
                           }`}>
                           <ChatMessageWithRelatedDocuments
                             chatContent={message}
@@ -615,25 +619,19 @@ const ChatPage: React.FC = () => {
                                 giveFeedback(messageId, feedback);
                               }
                             }}
+                            onRegenerate={
+                              message.role === 'assistant' && 
+                              idx === array.length - 1 && 
+                              messages.length > 1 && 
+                              !postingMessage && 
+                              !hasError 
+                                ? () => onRegenerate(reasoningEnabled)
+                                : undefined
+                            }
+                            isLastMessage={idx === array.length - 1}
                           />
                         </div>
                       </div>
-                      {/* Show regenerate button only for the last assistant message */}
-                      {message.role === 'assistant' && 
-                       idx === array.length - 1 && 
-                       messages.length > 1 && 
-                       !postingMessage && 
-                       !hasError && (
-                        <div className="flex justify-center mt-2 mb-4">
-                          <Button
-                            className="bg-aws-paper-light px-4 py-2 text-sm dark:bg-aws-paper-dark opacity-70 hover:opacity-100 transition-opacity"
-                            outlined
-                            onClick={() => onRegenerate(reasoningEnabled)}>
-                            <PiArrowsCounterClockwise className="mr-2" />
-                            {t('button.regenerate')}
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </>

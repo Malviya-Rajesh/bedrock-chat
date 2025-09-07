@@ -29,7 +29,6 @@ import {
 import LazyOutputText from './LazyOutputText';
 import { ConversationMeta } from '../@types/conversation';
 import { BotListItem } from '../@types/bot';
-import { isMobile } from 'react-device-detect';
 import useChat from '../hooks/useChat';
 import { useTranslation } from 'react-i18next';
 import Menu from './Menu';
@@ -234,46 +233,23 @@ const Drawer: React.FC<Props> = (props) => {
 
   const onClickNewChat = useCallback(() => {
     newChat();
-    closeSmallDrawer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const onClickNewBotChat = useCallback(
-    () => {
-      newChat();
-      closeSmallDrawer();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const smallDrawer = useRef<HTMLDivElement>(null);
-
-  const closeSmallDrawer = useCallback(() => {
-    if (smallDrawer.current?.classList.contains('visible')) {
+    if (opened) {
       switchOpen();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [newChat, opened, switchOpen]);
 
-  useLayoutEffect(() => {
-    // リサイズイベントを拾って状態を更新する
-    const onResize = () => {
-      if (isMobile) {
-        return;
-      }
+  const onClickNewBotChat = useCallback(() => {
+    newChat();
+    if (opened) {
+      switchOpen();
+    }
+  }, [newChat, opened, switchOpen]);
 
-      // 狭い画面のDrawerが表示されていて、画面サイズが大きくなったら状態を更新
-      if (!smallDrawer.current?.checkVisibility() && opened) {
-        switchOpen();
-      }
-    };
-    onResize();
-
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opened]);
+  const closeSmallDrawer = useCallback(() => {
+    if (opened) {
+      switchOpen();
+    }
+  }, [opened, switchOpen]);
 
   const isAdminPanel = useMemo(() => {
     return location.pathname.startsWith('/admin');
@@ -281,11 +257,27 @@ const Drawer: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className="relative h-full overflow-y-auto bg-aws-squid-ink-light scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30">
-        <nav
-          className={`lg:visible lg:w-64 ${
-            opened ? 'visible w-64' : 'invisible w-0'
-          } text-sm  text-white transition-width`}>
+      {/* Overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-dark-gray/90 transition-opacity ${
+          opened ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={switchOpen}
+      />
+
+      {/* Drawer */}
+      <div
+        className={`fixed left-0 top-0 z-50 h-full w-64 transform overflow-y-auto bg-aws-squid-ink-light transition-transform duration-300 ease-in-out scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30 ${
+          opened ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+        {/* Close button */}
+        <ButtonIcon
+          className="absolute right-2 top-2 z-10 text-white"
+          onClick={switchOpen}>
+          <PiX />
+        </ButtonIcon>
+
+        <nav className="text-sm text-white">
           {!isAdminPanel && (
             <>
               <DrawerItem
@@ -468,11 +460,11 @@ const Drawer: React.FC<Props> = (props) => {
             </>
           )}
 
+          {/* Bottom menu */}
           <div
             className={twMerge(
-              opened ? 'w-64' : 'w-0',
-              props.isAdmin ? 'h-20' : 'h-10',
-              'fixed -bottom-2 z-50 mb-2 flex flex-col items-start border-t bg-aws-squid-ink-light transition-width dark:bg-aws-ui-color-dark lg:w-64'
+              'absolute bottom-0 left-0 right-0 z-10 flex flex-col items-start border-t bg-aws-squid-ink-light dark:bg-aws-ui-color-dark',
+              props.isAdmin ? 'h-20' : 'h-10'
             )}>
             {props.isAdmin && !isAdminPanel && (
               <DrawerItem
@@ -503,19 +495,6 @@ const Drawer: React.FC<Props> = (props) => {
             />
           </div>
         </nav>
-      </div>
-
-      <div
-        ref={smallDrawer}
-        className={`lg:hidden ${opened ? 'visible' : 'hidden'}`}>
-        <ButtonIcon
-          className="fixed left-64 top-0 z-50 text-white"
-          onClick={switchOpen}>
-          <PiX />
-        </ButtonIcon>
-        <div
-          className="fixed z-40 h-dvh w-screen bg-dark-gray/90"
-          onClick={switchOpen}></div>
       </div>
     </>
   );

@@ -32,6 +32,24 @@ import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
 import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
 
+// Helper function to remove thinking process from content
+const removeThinkingProcess = (text: string): string => {
+  // Only filter in production unless VITE_SHOW_THINKING_PROCESS is set to true
+  const shouldHideThinkingProcess = import.meta.env.VITE_SHOW_THINKING_PROCESS !== 'true';
+  
+  if (!shouldHideThinkingProcess) {
+    return text;
+  }
+  
+  // Remove complete thinking tags
+  let cleanedText = text.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
+  
+  // Remove incomplete thinking tags (for streaming)
+  cleanedText = cleanedText.replace(/<thinking>[\s\S]*$/g, '');
+  
+  return cleanedText.trim();
+};
+
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
   reasoning?: ReasoningContext;
@@ -347,10 +365,12 @@ const ChatMessage: React.FC<Props> = (props) => {
               isStreaming={props.isStreaming}
               relatedDocuments={relatedDocuments}
               messageId={chatContent.id}>
-              {chatContent.content
-                .filter((content) => content.contentType === 'text')
-                .map((content) => (content as TextContent).body)
-                .join('\n')}
+              {removeThinkingProcess(
+                chatContent.content
+                  .filter((content) => content.contentType === 'text')
+                  .map((content) => (content as TextContent).body)
+                  .join('\n')
+              )}
             </ChatMessageMarkdown>
           )}
           
@@ -377,11 +397,13 @@ const ChatMessage: React.FC<Props> = (props) => {
                 className="text-dark-gray dark:text-light-gray"
                 text={
                   chatContent.content.find((c) => c.contentType === 'text')
-                    ? (
-                        chatContent.content.find(
-                          (c) => c.contentType === 'text'
-                        ) as TextContent
-                      ).body
+                    ? removeThinkingProcess(
+                        (
+                          chatContent.content.find(
+                            (c) => c.contentType === 'text'
+                          ) as TextContent
+                        ).body
+                      )
                     : ''
                 }
               />

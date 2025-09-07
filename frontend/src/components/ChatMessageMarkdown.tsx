@@ -94,16 +94,38 @@ const ChatMessageMarkdown: React.FC<Props> = ({
   relatedDocuments,
   messageId,
 }) => {
-  const sourceIds = useMemo(() => (
-    [...new Set(Array.from(
-      children.matchAll(/\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g),
+  const sourceIds = useMemo(() => {
+    // Remove thinking process content first before extracting source IDs
+    // Only filter in production unless VITE_SHOW_THINKING_PROCESS is set to true
+    const shouldHideThinkingProcess = import.meta.env.VITE_SHOW_THINKING_PROCESS !== 'true';
+    
+    let cleanedChildren = children;
+    if (shouldHideThinkingProcess) {
+      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
+      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*$/g, '');
+    }
+    
+    return [...new Set(Array.from(
+      cleanedChildren.matchAll(/\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g),
       match => match.groups!.sourceId,
-    ))]
-  ), [children]);
+    ))];
+  }, [children]);
 
   const chatWaitingSymbol = useMemo(() => i18next.t('app.chatWaitingSymbol'), []);
   const text = useMemo(() => {
-    const textRemovedIncompleteCitation = children.replace(/\[\^[^\]]*?$/, '[^');
+    // Remove thinking process content first
+    // Only filter in production unless VITE_SHOW_THINKING_PROCESS is set to true
+    const shouldHideThinkingProcess = import.meta.env.VITE_SHOW_THINKING_PROCESS !== 'true';
+    
+    let cleanedChildren = children;
+    if (shouldHideThinkingProcess) {
+      // Remove complete thinking tags
+      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
+      // Remove incomplete thinking tags (for streaming)
+      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*$/g, '');
+    }
+    
+    const textRemovedIncompleteCitation = cleanedChildren.replace(/\[\^[^\]]*?$/, '[^');
     let textReplacedSourceId = textRemovedIncompleteCitation.replace(
       /\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g,
       (_, sourceId) => {

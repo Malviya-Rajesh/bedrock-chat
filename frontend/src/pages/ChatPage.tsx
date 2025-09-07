@@ -599,10 +599,10 @@ const ChatPage: React.FC = () => {
                   {messages?.map((message, idx, array) => (
                     <div key={idx} className="flex justify-center">
                       <div
-                        className={`w-full max-w-4xl ${
+                        className={`w-11/12 md:w-10/12 lg:w-4/6 xl:w-3/6 my-2 rounded-xl ${
                           message.role === 'assistant'
-                            ? 'mx-4 my-2 rounded-xl bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
-                            : 'mx-4 my-2'
+                            ? 'bg-aws-squid-ink-light/5 dark:bg-aws-squid-ink-dark/35'
+                            : 'bg-gray-50 dark:bg-gray-800/30'
                         }`}>
                         <ChatMessageWithRelatedDocuments
                           chatContent={message}

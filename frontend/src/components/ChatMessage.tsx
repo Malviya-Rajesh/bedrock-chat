@@ -5,7 +5,6 @@ import ButtonCopy from './ButtonCopy';
 import {
   PiCaretLeftBold,
   PiNotePencil,
-  PiUserFill,
   PiThumbsDown,
   PiThumbsDownFill,
 } from 'react-icons/pi';
@@ -180,19 +179,10 @@ const ChatMessage: React.FC<Props> = (props) => {
         )}
       </div>
 
-      <div className="order-first col-span-12 flex lg:order-none lg:col-span-8 lg:col-start-3">
-        {chatContent?.role === 'user' && (
-          <div className="h-min rounded bg-aws-sea-blue-light p-2 text-xl text-white dark:bg-aws-sea-blue-dark">
-            <PiUserFill />
-          </div>
-        )}
-        {chatContent?.role === 'assistant' && (
-          <div className="min-w-[2.3rem] max-w-[2.3rem]">
-            <img src="/images/bedrock_icon_64.png" className="rounded" />
-          </div>
-        )}
-
-        <div className="ml-5 grow ">
+      <div className={`order-first col-span-12 flex lg:order-none lg:col-span-8 lg:col-start-3 ${
+        chatContent?.role === 'user' ? 'flex-row-reverse' : ''
+      }`}>
+        <div className="grow">
           {chatContent?.role == 'assistant' && reasoning?.content && (
             <ReasoningCard
               content={reasoning.content}
@@ -219,7 +209,7 @@ const ChatMessage: React.FC<Props> = (props) => {
               {chatContent.content.some(
                 (content) => content.contentType === 'image'
               ) && (
-                <div key="images">
+                <div key="images" className={chatContent?.role === 'user' ? 'text-right' : ''}>
                   {chatContent.content.map((content, idx) => {
                     if (content.contentType === 'image') {
                       const imageUrl = `data:${content.mediaType};base64,${content.body}`;
@@ -241,7 +231,7 @@ const ChatMessage: React.FC<Props> = (props) => {
               {chatContent.content.some(
                 (content) => content.contentType === 'attachment'
               ) && (
-                <div key="files" className="my-2 flex">
+                <div key="files" className={`my-2 flex ${chatContent?.role === 'user' ? 'justify-end' : ''}`}>
                   {chatContent.content.map((content, idx) => {
                     if (content.contentType === 'attachment') {
                       const isTextFile = TEXT_FILE_EXTENSIONS.some((ext) =>
@@ -282,7 +272,7 @@ const ChatMessage: React.FC<Props> = (props) => {
                     return (
                       <React.Fragment key={idx}>
                         {content.body.split('\n').map((c, idxBody) => (
-                          <div key={idxBody}>{c}</div>
+                          <div key={idxBody} className={chatContent?.role === 'user' ? 'text-right' : ''}>{c}</div>
                         ))}
                       </React.Fragment>
                     );
@@ -319,7 +309,7 @@ const ChatMessage: React.FC<Props> = (props) => {
           {isEdit && (
             <div>
               <Textarea
-                className="bg-transparent"
+                className={`bg-transparent ${chatContent?.role === 'user' ? 'text-right' : ''}`}
                 value={changedContent}
                 noBorder
                 onChange={(v) => setChangedContent(v)}
@@ -350,8 +340,8 @@ const ChatMessage: React.FC<Props> = (props) => {
         </div>
       </div>
 
-      <div className="col-span-2 col-start-11">
-        <div className="flex flex-col items-end lg:items-start">
+      <div className={`col-span-2 ${chatContent?.role === 'user' ? 'col-start-1' : 'col-start-11'}`}>
+        <div className={`flex flex-col ${chatContent?.role === 'user' ? 'items-start' : 'items-end lg:items-start'}`}>
           {chatContent?.role === 'user' && !isEdit && (
             <ButtonIcon
               className="text-dark-gray dark:text-light-gray"

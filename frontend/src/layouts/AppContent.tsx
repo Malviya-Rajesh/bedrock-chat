@@ -20,6 +20,7 @@ import DialogConfirmClearConversations from '../components/DialogConfirmClearCon
 import DialogSelectLanguage from '../components/DialogSelectLanguage';
 import useLocalStorage from '../hooks/useLocalStorage';
 import DialogDrawerOptions from '../components/DialogDrawerOptions';
+import Menu from '../components/Menu';
 
 type Props = BaseProps & {
   signOut?: () => void;
@@ -97,17 +98,9 @@ const AppContent: React.FC<Props> = (props) => {
         updateConversationTitle={async (conversationId, title) => {
           await updateTitle(conversationId, title);
         }}
-        onSignOut={() => {
-          props.signOut ? props.signOut() : null;
-        }}
         onDeleteConversation={(conversation) => {
           setIsOpenDeleteChat(true);
           setDeleteTarget(conversation);
-        }}
-        onClearConversations={() => setIsOpenClearConversations(true)}
-        onSelectLanguage={() => setIsOpenSelectLanguage(true)}
-        onClickDrawerOptions={() => {
-          setIsOpenDrawerOptions(true);
         }}
       />
       <DialogConfirmDeleteChat
@@ -168,9 +161,16 @@ const AppContent: React.FC<Props> = (props) => {
             )}
           </div>
 
-          <ButtonIcon onClick={onClickNewChat}>
-            <PiPlus />
-          </ButtonIcon>
+          <Menu
+            onSignOut={() => {
+              props.signOut ? props.signOut() : null;
+            }}
+            onSelectLanguage={() => setIsOpenSelectLanguage(true)}
+            onClearConversations={() => setIsOpenClearConversations(true)}
+            onClickDrawerOptions={() => {
+              setIsOpenDrawerOptions(true);
+            }}
+          />
         </header>
 
         <div

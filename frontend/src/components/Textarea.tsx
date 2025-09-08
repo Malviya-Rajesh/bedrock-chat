@@ -49,9 +49,9 @@ const Textarea = forwardRef<HTMLElement, Props>((props, focusInputRef) => {
           }
         }}
         className={twMerge(
-          'peer w-full resize-none rounded p-1.5 outline-none bg-white dark:bg-aws-ui-color-dark text-aws-font-color-light dark:text-aws-font-color-dark placeholder-gray-500 dark:placeholder-aws-font-color-gray',
+          'peer w-full resize-none rounded p-1.5 outline-none bg-transparent text-aws-font-color-light dark:text-aws-font-color-dark placeholder-gray-500 dark:placeholder-aws-font-color-gray',
           isMax ? 'overflow-y-auto' : 'overflow-hidden',
-          props.noBorder ? '' : 'border border-aws-font-color-light/50 dark:border-aws-font-color-dark/50',
+          props.noBorder ? '' : 'border border-aws-font-color-light/50 dark:border-aws-font-color-dark/50 bg-white dark:bg-aws-ui-color-dark',
           props.className
         )}
         rows={props.rows ?? 1}

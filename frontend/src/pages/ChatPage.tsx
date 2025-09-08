@@ -490,13 +490,15 @@ const ChatPage: React.FC = () => {
               role="presentation"
               className="flex h-full flex-col overflow-auto pb-16">
               {messages?.length === 0 ? (
-                <div className="relative mb-[45vh]  flex w-full flex-col items-center justify-center">
+                <div className="relative mb-[45vh] flex w-full flex-col items-center justify-center">
                   {!loadingConversation && (
-                    <SwitchBedrockModel
-                      className="mb-6 mt-3 w-min"
-                      activeModels={activeModels}
-                      botId={botId}
-                    />
+                    <div className="flex justify-center w-full">
+                      <SwitchBedrockModel
+                        className="mb-6 mt-3"
+                        activeModels={activeModels}
+                        botId={botId}
+                      />
+                    </div>
                   )}
                   <div className="px-20">
                     <div className="px-10 text-lg font-bold">

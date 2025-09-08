@@ -141,7 +141,7 @@ const AppContent: React.FC<Props> = (props) => {
 
       <main className="relative flex min-h-dvh flex-1 flex-col overflow-y-hidden transition-width">
         <header className="visible flex h-14 w-full items-center bg-aws-squid-ink-light px-3 py-2 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark">
-          <div className="flex items-center min-w-0">
+          <div className="flex items-center min-w-0 w-32">
             <button
               className="rounded-full p-2 hover:brightness-75 focus:outline-none focus:ring-1 transition-all"
               onClick={() => {
@@ -165,7 +165,7 @@ const AppContent: React.FC<Props> = (props) => {
             )}
           </div>
 
-          <div className="flex items-center justify-end text-sm font-medium min-w-0">
+          <div className="flex items-center justify-end text-sm font-medium min-w-0 w-32">
             Hi, {userFirstName}
           </div>
         </header>

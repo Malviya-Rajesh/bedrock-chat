@@ -267,7 +267,7 @@ const Drawer: React.FC<Props> = (props) => {
 
       {/* Drawer */}
       <div
-        className={`fixed left-0 top-0 z-50 h-full w-64 transform overflow-y-auto bg-aws-squid-ink-light transition-transform duration-300 ease-in-out scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30 ${
+        className={`fixed left-0 top-0 z-50 h-full w-64 transform overflow-y-auto bg-aws-squid-ink-light transition-transform duration-300 ease-in-out scrollbar-thin scrollbar-track-aws-squid-ink-light/10 scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-track-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30 ${
           opened ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Close button */}

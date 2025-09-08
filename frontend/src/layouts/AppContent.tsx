@@ -3,8 +3,7 @@ import Drawer from '../components/Drawer';
 import { BaseProps } from '../@types/common';
 import { ConversationMeta } from '../@types/conversation';
 import LazyOutputText from '../components/LazyOutputText';
-import { PiList, PiPlus } from 'react-icons/pi';
-import ButtonIcon from '../components/ButtonIcon';
+import { PiList } from 'react-icons/pi';
 import SnackbarProvider from '../providers/SnackbarProvider';
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -41,15 +40,11 @@ const AppContent: React.FC<Props> = (props) => {
   const { starredBots, recentlyUsedUnstarredBots } = useBot();
   const { newChat, isGeneratedTitle } = useChat();
   const { isConversationOrNewChat, pathPattern } = usePageTitlePathPattern();
-  const { isAdmin } = useLoginUser();
+  const { isAdmin, userFirstName } = useLoginUser();
   const [theme] = useLocalStorage('theme', 'light');
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
-
-  const onClickNewChat = useCallback(() => {
-    newChat();
-  }, [newChat]);
 
   const [isOpenDeleteChat, setIsOpenDeleteChat] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<
@@ -146,15 +141,17 @@ const AppContent: React.FC<Props> = (props) => {
 
       <main className="relative flex min-h-dvh flex-1 flex-col overflow-y-hidden transition-width">
         <header className="visible flex h-14 w-full items-center bg-aws-squid-ink-light px-3 py-2 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark">
-          <button
-            className="mr-3 rounded-full p-2 hover:brightness-75 focus:outline-none focus:ring-1 transition-all"
-            onClick={() => {
-              switchDrawer();
-            }}>
-            <PiList className="text-xl" />
-          </button>
+          <div className="flex items-center min-w-0">
+            <button
+              className="rounded-full p-2 hover:brightness-75 focus:outline-none focus:ring-1 transition-all"
+              onClick={() => {
+                switchDrawer();
+              }}>
+              <PiList className="text-xl" />
+            </button>
+          </div>
 
-          <div className="flex-1 flex items-center justify-center text-center">
+          <div className="flex-1 flex items-center justify-center text-center px-4">
             {isGeneratedTitle ? (
               <>
                 <LazyOutputText text={getTitle(conversationId ?? '')} />
@@ -168,11 +165,9 @@ const AppContent: React.FC<Props> = (props) => {
             )}
           </div>
 
-          <ButtonIcon 
-            className="text-xl hover:brightness-75 transition-all"
-            onClick={onClickNewChat}>
-            <PiPlus />
-          </ButtonIcon>
+          <div className="flex items-center justify-end text-sm font-medium min-w-0">
+            Hi, {userFirstName}
+          </div>
         </header>
 
         <div

@@ -277,34 +277,36 @@ const Drawer: React.FC<Props> = (props) => {
           <PiX />
         </ButtonIcon>
 
-        <nav className="text-sm text-aws-font-color-white-light dark:text-aws-font-color-white-dark">
+        <nav className="text-sm text-aws-font-color-white-light dark:text-aws-font-color-white-dark pt-2">
           {!isAdminPanel && (
             <>
-              <DrawerItem
-                isActive={false}
-                icon={<PiNotePencil />}
-                to="/"
-                onClick={onClickNewChat}
-                labelComponent={t('button.newChat')}
-              />
-              <DrawerItem
-                isActive={false}
-                icon={<PiListBullets />}
-                to="/bot/my"
-                labelComponent={getPageLabel('/bot/my')}
-                onClick={closeSmallDrawer}
-              />
-              <DrawerItem
-                isActive={false}
-                icon={<PiCompass />}
-                to="/bot/discover"
-                labelComponent={getPageLabel('/bot/discover')}
-                onClick={closeSmallDrawer}
-              />
+              <div className="mb-2">
+                <DrawerItem
+                  isActive={false}
+                  icon={<PiNotePencil />}
+                  to="/"
+                  onClick={onClickNewChat}
+                  labelComponent={t('button.newChat')}
+                />
+                <DrawerItem
+                  isActive={false}
+                  icon={<PiListBullets />}
+                  to="/bot/my"
+                  labelComponent={getPageLabel('/bot/my')}
+                  onClick={closeSmallDrawer}
+                />
+                <DrawerItem
+                  isActive={false}
+                  icon={<PiCompass />}
+                  to="/bot/discover"
+                  labelComponent={getPageLabel('/bot/discover')}
+                  onClick={closeSmallDrawer}
+                />
+              </div>
 
               <ExpandableDrawerGroup
                 label={t('app.starredBots')}
-                className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark">
+                className="border-t border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20 mt-2 pt-3 pb-2">
                 {starredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
                     <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
@@ -349,7 +351,7 @@ const Drawer: React.FC<Props> = (props) => {
 
               <ExpandableDrawerGroup
                 label={t('app.recentlyUsedBots')}
-                className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark ">
+                className="border-t border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20 mt-2 pt-3 pb-2">
                 {recentlyUsedUnstarredBots === undefined && (
                   <div className="flex flex-col gap-2 p-2">
                     <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
@@ -395,7 +397,7 @@ const Drawer: React.FC<Props> = (props) => {
               <ExpandableDrawerGroup
                 label={t('app.conversationHistory')}
                 className={twMerge(
-                  'border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark',
+                  'border-t border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20 mt-2 pt-3 pb-2',
                   props.isAdmin ? 'mb-20' : 'mb-10'
                 )}>
                 {conversations === undefined && (
@@ -440,30 +442,34 @@ const Drawer: React.FC<Props> = (props) => {
 
           {isAdminPanel && (
             <>
-              <div className="px-2 py-1 italic">{t('app.adminConsoles')}</div>
-              <DrawerItem
-                className="w-60"
-                isActive={location.pathname === '/admin/shared-bot-analytics'}
-                icon={<PiChartLine />}
-                to="/admin/shared-bot-analytics"
-                labelComponent={getPageLabel('/admin/shared-bot-analytics')}
-                onClick={closeSmallDrawer}
-              />
-              <DrawerItem
-                className="w-60"
-                isActive={location.pathname === '/admin/api-management'}
-                icon={<PiPlugs />}
-                to="/admin/api-management"
-                labelComponent={getPageLabel('/admin/api-management')}
-                onClick={closeSmallDrawer}
-              />
+              <div className="px-4 py-3 text-sm font-medium italic border-b border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20">
+                {t('app.adminConsoles')}
+              </div>
+              <div className="pt-2">
+                <DrawerItem
+                  className="w-60"
+                  isActive={location.pathname === '/admin/shared-bot-analytics'}
+                  icon={<PiChartLine />}
+                  to="/admin/shared-bot-analytics"
+                  labelComponent={getPageLabel('/admin/shared-bot-analytics')}
+                  onClick={closeSmallDrawer}
+                />
+                <DrawerItem
+                  className="w-60"
+                  isActive={location.pathname === '/admin/api-management'}
+                  icon={<PiPlugs />}
+                  to="/admin/api-management"
+                  labelComponent={getPageLabel('/admin/api-management')}
+                  onClick={closeSmallDrawer}
+                />
+              </div>
             </>
           )}
 
           {/* Bottom menu */}
           <div
             className={twMerge(
-              'absolute bottom-0 left-0 right-0 z-10 flex flex-col items-start border-t bg-aws-squid-ink-light dark:bg-aws-ui-color-dark',
+              'absolute bottom-0 left-0 right-0 z-10 flex flex-col items-start border-t border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20 bg-aws-squid-ink-light dark:bg-aws-ui-color-dark',
               props.isAdmin ? 'h-20' : 'h-10'
             )}>
             {props.isAdmin && !isAdminPanel && (

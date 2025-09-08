@@ -17,6 +17,26 @@ const useLoginUser = () => {
     return session?.tokens?.idToken?.payload?.['email']?.toString() ?? '';
   }, [session?.tokens?.idToken?.payload]);
 
+  const userFirstName = useMemo(() => {
+    // Try to get given_name first, then name, then extract from email
+    const payload = session?.tokens?.idToken?.payload;
+    const givenName = payload?.['given_name']?.toString();
+    const name = payload?.['name']?.toString();
+    const email = payload?.['email']?.toString();
+    
+    if (givenName) {
+      return givenName;
+    } else if (name) {
+      // If name contains full name, take first part
+      return name.split(' ')[0];
+    } else if (email) {
+      // Extract first part of email before @ and capitalize
+      const emailPrefix = email.split('@')[0];
+      return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+    }
+    return 'User';
+  }, [session?.tokens?.idToken?.payload]);
+
   const groups = useMemo(() => {
     return session?.tokens?.idToken?.payload?.['cognito:groups'];
   }, [session?.tokens?.idToken?.payload]);
@@ -54,6 +74,7 @@ const useLoginUser = () => {
       ? groups.map((group) => group?.toString() ?? '')
       : [],
     userName,
+    userFirstName,
     userId,
   };
 };

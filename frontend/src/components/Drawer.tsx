@@ -31,6 +31,7 @@ import { ConversationMeta } from '../@types/conversation';
 import { BotListItem } from '../@types/bot';
 import useChat from '../hooks/useChat';
 import { useTranslation } from 'react-i18next';
+import Menu from './Menu';
 import DrawerItem from './DrawerItem';
 import ExpandableDrawerGroup from './ExpandableDrawerGroup';
 import { usePageLabel } from '../routes';
@@ -49,7 +50,11 @@ type Props = BaseProps & {
     conversationId: string,
     title: string
   ) => Promise<void>;
+  onSignOut: () => void;
   onDeleteConversation: (conversation: ConversationMeta) => void;
+  onClearConversations: () => void;
+  onSelectLanguage: () => void;
+  onClickDrawerOptions: () => void;
 };
 
 type ItemProps = BaseProps & {
@@ -262,56 +267,51 @@ const Drawer: React.FC<Props> = (props) => {
 
       {/* Drawer */}
       <div
-        className={`fixed left-0 top-0 z-50 h-full w-64 transform overflow-y-auto bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700/50 transition-transform duration-300 ease-in-out scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600/30 hover:scrollbar-thumb-slate-600/50 ${
+        className={`fixed left-0 top-0 z-50 h-full w-64 transform overflow-y-auto bg-aws-squid-ink-light transition-transform duration-300 ease-in-out scrollbar-thin scrollbar-track-white scrollbar-thumb-aws-squid-ink-light/30 dark:bg-aws-ui-color-dark dark:scrollbar-thumb-aws-ui-color-dark/30 ${
           opened ? 'translate-x-0' : '-translate-x-full'
         }`}>
         {/* Close button */}
         <ButtonIcon
-          className="absolute right-3 top-3 z-10 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
+          className="absolute right-2 top-2 z-10 text-white text-xl hover:brightness-75 transition-all"
           onClick={switchOpen}>
           <PiX />
         </ButtonIcon>
 
-        <nav className="text-sm text-slate-200 pt-4 pb-16">
+        <nav className="text-sm text-aws-font-color-white-light dark:text-aws-font-color-white-dark">
           {!isAdminPanel && (
             <>
-              <div className="px-4 pb-3">
-                <DrawerItem
-                  isActive={false}
-                  icon={<PiNotePencil />}
-                  to="/"
-                  onClick={onClickNewChat}
-                  labelComponent={t('button.newChat')}
-                />
-              </div>
-              
-              <div className="border-t border-slate-700/50 pt-3">
-                <DrawerItem
-                  isActive={false}
-                  icon={<PiListBullets />}
-                  to="/bot/my"
-                  labelComponent={getPageLabel('/bot/my')}
-                  onClick={closeSmallDrawer}
-                />
-                <DrawerItem
-                  isActive={false}
-                  icon={<PiCompass />}
-                  to="/bot/discover"
-                  labelComponent={getPageLabel('/bot/discover')}
-                  onClick={closeSmallDrawer}
-                />
-              </div>
+              <DrawerItem
+                isActive={false}
+                icon={<PiNotePencil />}
+                to="/"
+                onClick={onClickNewChat}
+                labelComponent={t('button.newChat')}
+              />
+              <DrawerItem
+                isActive={false}
+                icon={<PiListBullets />}
+                to="/bot/my"
+                labelComponent={getPageLabel('/bot/my')}
+                onClick={closeSmallDrawer}
+              />
+              <DrawerItem
+                isActive={false}
+                icon={<PiCompass />}
+                to="/bot/discover"
+                labelComponent={getPageLabel('/bot/discover')}
+                onClick={closeSmallDrawer}
+              />
 
               <ExpandableDrawerGroup
                 label={t('app.starredBots')}
-                className="border-t border-slate-700/50 pt-4 mt-4">
+                className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark">
                 {starredBots === undefined && (
-                  <div className="flex flex-col gap-3 p-3">
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
+                  <div className="flex flex-col gap-2 p-2">
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
                   </div>
                 )}
                 {starredBots
@@ -337,7 +337,7 @@ const Drawer: React.FC<Props> = (props) => {
                   <Button
                     text
                     rightIcon={<PiArrowRight />}
-                    className="w-full mx-3 my-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700/30 rounded-lg transition-all duration-200"
+                    className="w-full"
                     onClick={() => {
                       navigate('/bot/starred');
                       closeSmallDrawer();
@@ -349,14 +349,14 @@ const Drawer: React.FC<Props> = (props) => {
 
               <ExpandableDrawerGroup
                 label={t('app.recentlyUsedBots')}
-                className="border-t border-slate-700/50 pt-4 mt-4">
+                className="border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark ">
                 {recentlyUsedUnstarredBots === undefined && (
-                  <div className="flex flex-col gap-3 p-3">
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
+                  <div className="flex flex-col gap-2 p-2">
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
                   </div>
                 )}
                 {recentlyUsedUnstarredBots
@@ -382,7 +382,7 @@ const Drawer: React.FC<Props> = (props) => {
                   <Button
                     text
                     rightIcon={<PiArrowRight />}
-                    className="w-full mx-3 my-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700/30 rounded-lg transition-all duration-200"
+                    className="w-full"
                     onClick={() => {
                       navigate('/bot/recently-used');
                       closeSmallDrawer();
@@ -395,16 +395,16 @@ const Drawer: React.FC<Props> = (props) => {
               <ExpandableDrawerGroup
                 label={t('app.conversationHistory')}
                 className={twMerge(
-                  'border-t border-slate-700/50 pt-4 mt-4',
+                  'border-t bg-aws-squid-ink-light pt-1 dark:bg-aws-squid-ink-dark',
                   props.isAdmin ? 'mb-20' : 'mb-10'
                 )}>
                 {conversations === undefined && (
-                  <div className="flex flex-col gap-3 p-3">
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
-                    <Skeleton className="h-10 w-full bg-slate-600/30 rounded-lg" />
+                  <div className="flex flex-col gap-2 p-2">
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
                   </div>
                 )}
                 {conversations
@@ -426,7 +426,7 @@ const Drawer: React.FC<Props> = (props) => {
                   <Button
                     text
                     rightIcon={<PiArrowRight />}
-                    className="w-full mx-3 my-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700/30 rounded-lg transition-all duration-200"
+                    className="w-full"
                     onClick={() => {
                       navigate('/conversations');
                       closeSmallDrawer();
@@ -440,9 +440,7 @@ const Drawer: React.FC<Props> = (props) => {
 
           {isAdminPanel && (
             <>
-              <div className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-700/50 mb-4">
-                {t('app.adminConsoles')}
-              </div>
+              <div className="px-2 py-1 italic">{t('app.adminConsoles')}</div>
               <DrawerItem
                 className="w-60"
                 isActive={location.pathname === '/admin/shared-bot-analytics'}
@@ -462,33 +460,41 @@ const Drawer: React.FC<Props> = (props) => {
             </>
           )}
 
+          {/* Bottom menu */}
+          <div
+            className={twMerge(
+              'absolute bottom-0 left-0 right-0 z-10 flex flex-col items-start border-t bg-aws-squid-ink-light dark:bg-aws-ui-color-dark',
+              props.isAdmin ? 'h-20' : 'h-10'
+            )}>
+            {props.isAdmin && !isAdminPanel && (
+              <DrawerItem
+                className="w-60"
+                isActive={false}
+                icon={<PiPresentationChart />}
+                to="/admin/shared-bot-analytics"
+                labelComponent={t('app.adminConsoles')}
+                onClick={closeSmallDrawer}
+              />
+            )}
+            {isAdminPanel && (
+              <DrawerItem
+                className="w-60"
+                isActive={false}
+                icon={<PiChatCenteredDotsDuotone />}
+                to="/"
+                labelComponent={t('app.backChat')}
+                onClick={closeSmallDrawer}
+              />
+            )}
+            <Menu
+              className="mx-2 flex h-10 w-60 justify-start"
+              onSignOut={props.onSignOut}
+              onSelectLanguage={props.onSelectLanguage}
+              onClearConversations={props.onClearConversations}
+              onClickDrawerOptions={props.onClickDrawerOptions}
+            />
+          </div>
         </nav>
-
-        {/* Admin links at bottom */}
-        {props.isAdmin && !isAdminPanel && (
-          <div className="absolute bottom-0 left-0 right-0 border-t border-slate-700/50 bg-gradient-to-b from-slate-900 to-slate-800 p-2">
-            <DrawerItem
-              className="w-full"
-              isActive={false}
-              icon={<PiPresentationChart />}
-              to="/admin/shared-bot-analytics"
-              labelComponent={t('app.adminConsoles')}
-              onClick={closeSmallDrawer}
-            />
-          </div>
-        )}
-        {isAdminPanel && (
-          <div className="absolute bottom-0 left-0 right-0 border-t border-slate-700/50 bg-gradient-to-b from-slate-900 to-slate-800 p-2">
-            <DrawerItem
-              className="w-full"
-              isActive={false}
-              icon={<PiChatCenteredDotsDuotone />}
-              to="/"
-              labelComponent={t('app.backChat')}
-              onClick={closeSmallDrawer}
-            />
-          </div>
-        )}
       </div>
     </>
   );

@@ -483,78 +483,7 @@ const ChatPage: React.FC = () => {
       onDrop={endDnd}
       onDragEnd={endDnd}>
       <div className="flex-1 overflow-hidden">
-        <div className="sticky top-0 z-10 mb-1.5 flex h-14 w-full items-center justify-between border-b border-gray bg-aws-paper-light p-2 dark:bg-aws-paper-dark">
-          <div className="flex w-full justify-between">
-            <div className="p-2">
-              <div className="mr-10 flex items-center whitespace-nowrap font-bold">
-                {isLoadingBot ? (
-                  <Skeleton className="h-5 w-32" />
-                ) : (
-                  <>
-                    <IconPinnedBot
-                      botSharedStatus={bot?.sharedStatus}
-                      className="mr-1 text-aws-aqua"
-                    />
-                    {pageTitle}
-                  </>
-                )}
-              </div>
-            </div>
-
-            {isLoadingBot && (
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="size-7" />
-                <Skeleton className="h-7 w-12" />
-              </div>
-            )}
-
-            {isAvailabilityBot && !isLoadingBot && (
-              <div className="absolute -top-1 right-0 flex h-full items-center">
-                <div className="h-full w-12 bg-gradient-to-r from-transparent to-aws-paper-light dark:to-aws-paper-dark"></div>
-                <div className="flex items-center bg-aws-paper-light dark:bg-aws-paper-dark">
-                  {bot?.owned && (
-                    <StatusSyncBot
-                      syncStatus={bot.syncStatus}
-                      onClickError={onClickSyncError}
-                    />
-                  )}
-
-                  <ButtonStar
-                    isStarred={bot?.isStarred ?? false}
-                    onClick={onClickStar}
-                  />
-
-                  <MenuBot
-                    className="mx-1"
-                    {...(bot?.owned && {
-                      onClickEdit: () => {
-                        onClickBotEdit(bot.id);
-                      },
-                    })}
-                    {...(bot?.sharedScope !== 'private' && {
-                      onClickCopyUrl: () => {
-                        onClickCopyUrl(bot?.id ?? '');
-                      },
-                    })}
-                    {...(canSwitchPinned
-                      ? {
-                          onClickSwitchPinned: () => {
-                            bot && togglePinBot(bot);
-                          },
-                          isPinned: isPinnedBot(bot?.sharedStatus ?? ''),
-                        }
-                      : {
-                          isPinned: undefined,
-                          onClickSwitchPinned: undefined,
-                        })}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <section className="relative size-full flex-1 overflow-auto pb-9">
+        <section className="relative size-full flex-1 overflow-auto">
           <div className="h-full">
             <div
               id="messages"

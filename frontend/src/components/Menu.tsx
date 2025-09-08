@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Button from './Button';
 import {
-  PiList,
   PiSidebar,
   PiSignOut,
   PiTranslate,
   PiTrash,
+  PiDotsThreeVertical,
 } from 'react-icons/pi';
 import { useTranslation } from 'react-i18next';
 import { BaseProps } from '../@types/common';
@@ -71,62 +72,64 @@ const MenuSettings: React.FC<Props> = (props) => {
 
   return (
     <>
-      <button
+      <Button
         ref={buttonRef}
         className={twMerge(
-          'relative p-2 rounded-full hover:bg-slate-700/50 transition-colors text-white',
+          'relative bg-aws-squid-ink-light dark:bg-aws-squid-ink-dark text-aws-font-color-white-light dark:text-aws-font-color-white-dark text-sm',
           props.className
         )}
+        text
+        icon={<PiDotsThreeVertical className="text-base" />}
         onClick={() => {
           setIsOpen(!isOpen);
         }}>
-        <PiList className="text-xl" />
-      </button>
+        {t('button.menu')}
+      </Button>
 
       {isOpen && (
         <div
           ref={menuRef}
-          className="absolute top-12 right-2 w-64 overflow-hidden rounded border border-slate-600 bg-slate-800 shadow-lg text-slate-200 z-50">
-          <div className="flex flex-col gap-1 border-b border-slate-600 p-4 bg-slate-700/50">
-            <div className="font-semibold text-slate-200 truncate">{userName}</div>
-            <div className="text-sm">
-              <div className="italic text-slate-400">{t('app.userGroups')}</div>
-              <ul className="list-disc pl-5 text-slate-300">
+          className="absolute bottom-10 left-2 w-60 rounded border border-aws-font-color-white-light bg-aws-sea-blue-light text-aws-font-color-white-light dark:border-aws-font-color-white-dark dark:bg-aws-ui-color-dark dark:text-aws-font-color-white-dark">
+          <div className="flex flex-col gap-1 border-b p-2">
+            <div className="font-bold">{userName}</div>
+            <div className="">
+              <div className="italic">{t('app.userGroups')}</div>
+              <ul className="list-disc pl-5">
                 {userGroups.map((group) => (
-                  <li key={group} className="truncate">{group}</li>
+                  <li key={group}>{group}</li>
                 ))}
               </ul>
             </div>
           </div>
 
           <div
-            className="flex w-full cursor-pointer items-center p-3 hover:bg-slate-700 transition-colors"
+            className="flex w-full cursor-pointer items-center p-2 hover:bg-aws-sea-blue-hover-light dark:hover:bg-aws-paper-dark"
             onClick={() => {
               setIsOpen(false);
               props.onClickDrawerOptions();
             }}>
-            <PiSidebar className="mr-3 text-slate-400" />
-            <span className="text-slate-200 truncate">{t('button.drawerOption')}</span>
+            <PiSidebar className="mr-2" />
+            {t('button.drawerOption')}
           </div>
 
           <div
-            className="flex w-full cursor-pointer items-center p-3 hover:bg-slate-700 transition-colors"
+            className="flex w-full cursor-pointer items-center p-2 hover:bg-aws-sea-blue-hover-light dark:hover:bg-aws-paper-dark"
             onClick={() => {
               setIsOpen(false);
               props.onSelectLanguage();
             }}>
-            <PiTranslate className="mr-3 text-slate-400" />
-            <span className="text-slate-200 truncate">{t('button.language')}</span>
+            <PiTranslate className="mr-2" />
+            {t('button.language')}
           </div>
 
-          <div className="flex w-full items-center px-3 py-2 hover:bg-slate-700 transition-colors">
+          <div className="flex w-full items-center px-2 hover:bg-aws-sea-blue-hover-light dark:hover:bg-aws-paper-dark">
             {isDarkTheme ? (
-              <IoMoonSharp className="mr-3 text-slate-400" />
+              <IoMoonSharp className="mr-2" />
             ) : (
-              <IoSunnyOutline className="mr-3 text-slate-400" />
+              <IoSunnyOutline className="mr-2" />
             )}
             <div className="flex w-full items-center justify-between">
-              <span className="text-slate-200">{t('button.mode')}</span>
+              <span>{t('button.mode')}</span>
               <Toggle
                 value={isDarkTheme}
                 onChange={(isDarkTheme) => {
@@ -136,19 +139,19 @@ const MenuSettings: React.FC<Props> = (props) => {
             </div>
           </div>
           <div
-            className="flex w-full cursor-pointer items-center border-t border-slate-600 p-3 hover:bg-slate-700 transition-colors"
+            className="flex w-full cursor-pointer items-center border-t p-2 hover:bg-aws-sea-blue-hover-light dark:hover:bg-aws-paper-dark"
             onClick={() => {
               setIsOpen(false);
               props.onClearConversations();
             }}>
-            <PiTrash className="mr-3 text-slate-400" />
-            <span className="text-slate-200 truncate">{t('button.clearConversation')}</span>
+            <PiTrash className="mr-2" />
+            {t('button.clearConversation')}
           </div>
           <div
-            className="flex w-full cursor-pointer items-center border-t border-slate-600 p-3 hover:bg-red-900/30 transition-colors"
+            className="flex w-full cursor-pointer items-center border-t p-2 hover:bg-aws-sea-blue-hover-light dark:hover:bg-aws-paper-dark"
             onClick={props.onSignOut}>
-            <PiSignOut className="mr-3 text-red-400" />
-            <span className="text-red-400 truncate">{t('button.signOut')}</span>
+            <PiSignOut className="mr-2" />
+            {t('button.signOut')}
           </div>
         </div>
       )}

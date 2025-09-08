@@ -9,6 +9,7 @@ import ButtonDownload from './ButtonDownload';
 import ButtonCopy from './ButtonCopy';
 import { RelatedDocument } from '../@types/conversation';
 import { twMerge } from 'tailwind-merge';
+import i18next from 'i18next';
 import { create } from 'zustand';
 import { produce } from 'immer';
 import rehypeExternalLinks, { Options } from 'rehype-external-links';
@@ -16,17 +17,6 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css';
 import { onlyText } from 'react-children-utilities';
-
-// Animated typing indicator component
-const TypingIndicator = () => {
-  return (
-    <span className="inline-flex items-center ml-1 space-x-1">
-      <span className="w-2 h-2 bg-current rounded-full animate-bounce"></span>
-      <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-      <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-    </span>
-  );
-};
 import RelatedDocumentViewer from './RelatedDocumentViewer';
 
 type Props = BaseProps & {
@@ -104,37 +94,16 @@ const ChatMessageMarkdown: React.FC<Props> = ({
   relatedDocuments,
   messageId,
 }) => {
-  const sourceIds = useMemo(() => {
-    // Remove thinking process content first before extracting source IDs
-    // Only filter in production unless VITE_SHOW_THINKING_PROCESS is set to true
-    const shouldHideThinkingProcess = import.meta.env.VITE_SHOW_THINKING_PROCESS !== 'true';
-    
-    let cleanedChildren = children;
-    if (shouldHideThinkingProcess) {
-      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
-      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*$/g, '');
-    }
-    
-    return [...new Set(Array.from(
-      cleanedChildren.matchAll(/\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g),
+  const sourceIds = useMemo(() => (
+    [...new Set(Array.from(
+      children.matchAll(/\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g),
       match => match.groups!.sourceId,
-    ))];
-  }, [children]);
+    ))]
+  ), [children]);
 
+  const chatWaitingSymbol = useMemo(() => i18next.t('app.chatWaitingSymbol'), []);
   const text = useMemo(() => {
-    // Remove thinking process content first
-    // Only filter in production unless VITE_SHOW_THINKING_PROCESS is set to true
-    const shouldHideThinkingProcess = import.meta.env.VITE_SHOW_THINKING_PROCESS !== 'true';
-    
-    let cleanedChildren = children;
-    if (shouldHideThinkingProcess) {
-      // Remove complete thinking tags
-      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
-      // Remove incomplete thinking tags (for streaming)
-      cleanedChildren = cleanedChildren.replace(/<thinking>[\s\S]*$/g, '');
-    }
-    
-    const textRemovedIncompleteCitation = cleanedChildren.replace(/\[\^[^\]]*?$/, '[^');
+    const textRemovedIncompleteCitation = children.replace(/\[\^[^\]]*?$/, '[^');
     let textReplacedSourceId = textRemovedIncompleteCitation.replace(
       /\[\^(?<sourceId>[\w!?/+\-_~=;.,*&@#$%]+?)\]/g,
       (_, sourceId) => {
@@ -158,7 +127,7 @@ const ChatMessageMarkdown: React.FC<Props> = ({
     );
 
     if (isStreaming) {
-      // Remove the text symbol approach, we'll add a React component instead
+      textReplacedSourceId += chatWaitingSymbol;
     }
 
     // Default Footnote link is not shown, so set dummy
@@ -167,7 +136,7 @@ const ChatMessageMarkdown: React.FC<Props> = ({
     }
 
     return textReplacedSourceId;
-  }, [children, isStreaming, sourceIds]);
+  }, [children, isStreaming, sourceIds, chatWaitingSymbol]);
 
   const remarkPlugins = useMemo(() => {
     return [remarkGfm, remarkBreaks, remarkMath];
@@ -181,15 +150,14 @@ const ChatMessageMarkdown: React.FC<Props> = ({
   }, []);
 
   return (
-    <>
-      <ReactMarkdown
-        className={twMerge(className, 'prose dark:prose-invert max-w-full break-words')}
-        children={text}
-        remarkPlugins={remarkPlugins}
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        rehypePlugins={rehypePlugins}
-        components={{
+    <ReactMarkdown
+      className={twMerge(className, 'prose dark:prose-invert max-w-full break-words')}
+      children={text}
+      remarkPlugins={remarkPlugins}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      rehypePlugins={rehypePlugins}
+      components={{
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -281,8 +249,6 @@ const ChatMessageMarkdown: React.FC<Props> = ({
         },
       }}
     />
-    {isStreaming && <TypingIndicator />}
-    </>
   );
 };
 

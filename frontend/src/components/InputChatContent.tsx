@@ -474,12 +474,12 @@ const InputChatContent = forwardRef<HTMLElement, Props>(
           onDrop={onDrop}
           className={twMerge(
             props.className,
-            'relative mb-7 flex w-11/12 flex-col gap-1 rounded-xl border border-gray-300 bg-white dark:bg-aws-ui-color-dark dark:border-gray-600 md:w-10/12 lg:w-4/6 xl:w-3/6'
+            'relative mb-7 flex w-11/12 flex-col gap-1 rounded-xl border border-gray-300 bg-white dark:bg-aws-paper-dark dark:border-gray-600 md:w-10/12 lg:w-4/6 xl:w-3/6'
           )}>
           <div className="flex w-full">
             <Textarea
               key={`textarea-${props.isNewChat}`} // Add a key to force re-render
-              className="m-1 bg-gray-50 dark:bg-gray-800 pr-12 scrollbar-thin scrollbar-thumb-light-gray rounded-lg"
+              className="m-1 bg-gray-50 dark:bg-aws-ui-color-dark pr-12 scrollbar-thin scrollbar-thumb-light-gray rounded-lg"
               placeholder={t('app.inputMessage')}
               disabled={props.disabled}
               noBorder

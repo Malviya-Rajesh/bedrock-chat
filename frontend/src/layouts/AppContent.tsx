@@ -20,7 +20,6 @@ import DialogConfirmClearConversations from '../components/DialogConfirmClearCon
 import DialogSelectLanguage from '../components/DialogSelectLanguage';
 import useLocalStorage from '../hooks/useLocalStorage';
 import DialogDrawerOptions from '../components/DialogDrawerOptions';
-import Menu from '../components/Menu';
 
 type Props = BaseProps & {
   signOut?: () => void;
@@ -98,9 +97,17 @@ const AppContent: React.FC<Props> = (props) => {
         updateConversationTitle={async (conversationId, title) => {
           await updateTitle(conversationId, title);
         }}
+        onSignOut={() => {
+          props.signOut ? props.signOut() : null;
+        }}
         onDeleteConversation={(conversation) => {
           setIsOpenDeleteChat(true);
           setDeleteTarget(conversation);
+        }}
+        onClearConversations={() => setIsOpenClearConversations(true)}
+        onSelectLanguage={() => setIsOpenSelectLanguage(true)}
+        onClickDrawerOptions={() => {
+          setIsOpenDrawerOptions(true);
         }}
       />
       <DialogConfirmDeleteChat
@@ -138,16 +145,16 @@ const AppContent: React.FC<Props> = (props) => {
       />
 
       <main className="relative flex min-h-dvh flex-1 flex-col overflow-y-hidden transition-width">
-        <header className="visible flex h-12 w-full items-center bg-aws-squid-ink-light p-3 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark">
+        <header className="visible flex h-14 w-full items-center bg-aws-squid-ink-light px-3 py-2 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark">
           <button
-            className="mr-2 rounded-full p-2 hover:brightness-50 focus:outline-none focus:ring-1 "
+            className="mr-3 rounded-full p-2 hover:brightness-75 focus:outline-none focus:ring-1 transition-all"
             onClick={() => {
               switchDrawer();
             }}>
-            <PiList />
+            <PiList className="text-xl" />
           </button>
 
-          <div className="flex-1 justify-center">
+          <div className="flex-1 flex items-center justify-center text-center">
             {isGeneratedTitle ? (
               <>
                 <LazyOutputText text={getTitle(conversationId ?? '')} />
@@ -161,16 +168,11 @@ const AppContent: React.FC<Props> = (props) => {
             )}
           </div>
 
-          <Menu
-            onSignOut={() => {
-              props.signOut ? props.signOut() : null;
-            }}
-            onSelectLanguage={() => setIsOpenSelectLanguage(true)}
-            onClearConversations={() => setIsOpenClearConversations(true)}
-            onClickDrawerOptions={() => {
-              setIsOpenDrawerOptions(true);
-            }}
-          />
+          <ButtonIcon 
+            className="text-xl hover:brightness-75 transition-all"
+            onClick={onClickNewChat}>
+            <PiPlus />
+          </ButtonIcon>
         </header>
 
         <div

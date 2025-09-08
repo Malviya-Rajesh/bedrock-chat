@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useConversationApi from './useConversationApi';
 import { produce } from 'immer';
 import {
@@ -239,6 +240,7 @@ const useChatState = create<{
 const useChat = () => {
   const [agentThinking, agentSend] = useMachine(agentThinkingState);
   const [reasoningThinking, reasoningSend] = useMachine(reasoningState);
+  const navigate = useNavigate();
 
   const {
     chats,
@@ -442,6 +444,8 @@ const useChat = () => {
         .updateTitleWithGeneratedTitle(newConversationId)
         .then(() => {
           setConversationId(newConversationId);
+          // Navigate to the new conversation URL
+          navigate(`/${newConversationId}`);
         })
         .finally(() => {
           syncConversations().then(() => {

@@ -212,7 +212,7 @@ const ConversationHistoryPage: React.FC = () => {
           conversations?.map((conversation) => (
             <div
               key={conversation.id}
-              className="group flex cursor-pointer items-center justify-between border-b border-gray p-2 hover:bg-light-gray"
+              className="group flex cursor-pointer items-center justify-between border-b border-gray p-2 hover:bg-light-gray dark:hover:bg-aws-ui-color-dark hover:text-aws-font-color-light dark:hover:text-aws-font-color-dark"
               onClick={() => onClickConversation(conversation.id)}>
               <div className="flex flex-col">
                 {editingConversationId === conversation.id ? (

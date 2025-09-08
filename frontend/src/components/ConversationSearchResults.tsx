@@ -92,7 +92,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   return (
     <div
-      className="group flex cursor-pointer flex-col border-b border-gray p-2 hover:bg-light-gray dark:border-dark-gray dark:hover:bg-aws-squid-ink-light"
+      className="group flex cursor-pointer flex-col border-b border-gray p-2 hover:bg-light-gray dark:border-dark-gray dark:hover:bg-aws-squid-ink-light hover:text-aws-font-color-light dark:hover:text-aws-font-color-dark"
       onClick={() => onClick(conversation.id)}>
       <div className="flex items-center justify-between">
         <div className="flex flex-col">

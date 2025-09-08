@@ -71,7 +71,7 @@ const CardBotForDiscover: React.FC<Props> = (props) => {
       </ModalDialog>
 
       <div
-        className="flex h-28 w-full cursor-pointer flex-col rounded-xl border border-gray bg-white px-4 py-2 transition-colors hover:bg-light-gray dark:border-dark-gray dark:bg-aws-squid-ink-dark"
+        className="flex h-28 w-full cursor-pointer flex-col rounded-xl border border-gray bg-white px-4 py-2 transition-colors hover:bg-light-gray dark:border-dark-gray dark:bg-aws-squid-ink-dark hover:text-aws-font-color-light dark:hover:text-aws-font-color-dark"
         onClick={handleClick}>
         <div className="flex items-center">
           {!props.hidePinnedIcon && (

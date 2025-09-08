@@ -66,7 +66,7 @@ const SwitchBedrockModel: React.FC<Props> = (props) => {
                     {availableModels.map((model) => (
                       <div
                         key={model.modelId}
-                        className="m-1 flex cursor-pointer rounded p-1 px-2 hover:bg-light-gray dark:hover:bg-aws-paper-dark"
+                        className="m-1 flex cursor-pointer rounded p-1 px-2 hover:bg-light-gray dark:hover:bg-aws-paper-dark hover:text-aws-font-color-light dark:hover:text-aws-font-color-dark"
                         onClick={() => {
                           setModelId(model.modelId);
                         }}>

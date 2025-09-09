@@ -31,6 +31,7 @@ import { convertThinkingLogToAgentToolProps } from '../features/agent/utils/Agen
 import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
 import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
+import { removeThinkingContent, shouldFilterThinkingContent } from '../utils/textFilter';
 
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
@@ -89,6 +90,11 @@ const ChatMessage: React.FC<Props> = (props) => {
   }, [props.relatedDocuments, chatContent]);
 
   const reasoning = useMemo(() => {
+    // If thinking content should be filtered, don't show reasoning at all
+    if (shouldFilterThinkingContent()) {
+      return undefined;
+    }
+    
     if (props.reasoning != null && props.reasoning.content != '') {
       return props.reasoning;
     }
@@ -347,10 +353,17 @@ const ChatMessage: React.FC<Props> = (props) => {
               isStreaming={props.isStreaming}
               relatedDocuments={relatedDocuments}
               messageId={chatContent.id}>
-              {chatContent.content
-                .filter((content) => content.contentType === 'text')
-                .map((content) => (content as TextContent).body)
-                .join('\n')}
+              {(() => {
+                const textContent = chatContent.content
+                  .filter((content) => content.contentType === 'text')
+                  .map((content) => (content as TextContent).body)
+                  .join('\n');
+                
+                // Filter thinking content from the main response text
+                return shouldFilterThinkingContent() 
+                  ? removeThinkingContent(textContent)
+                  : textContent;
+              })()}
             </ChatMessageMarkdown>
           )}
           
@@ -375,15 +388,20 @@ const ChatMessage: React.FC<Props> = (props) => {
               </ButtonIcon>
               <ButtonCopy
                 className="text-dark-gray dark:text-light-gray"
-                text={
-                  chatContent.content.find((c) => c.contentType === 'text')
+                text={(() => {
+                  const textContent = chatContent.content.find((c) => c.contentType === 'text')
                     ? (
                         chatContent.content.find(
                           (c) => c.contentType === 'text'
                         ) as TextContent
                       ).body
-                    : ''
-                }
+                    : '';
+                  
+                  // Filter thinking content from copied text
+                  return shouldFilterThinkingContent() 
+                    ? removeThinkingContent(textContent)
+                    : textContent;
+                })()}
               />
             </div>
           )}

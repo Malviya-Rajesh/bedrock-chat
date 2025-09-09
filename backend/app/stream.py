@@ -21,6 +21,10 @@ from app.repositories.models.custom_bot import GenerationParamsModel
 from app.repositories.models.custom_bot_guardrails import BedrockGuardrailsModel
 from app.routes.schemas.conversation import type_model_name
 from app.utils import get_bedrock_runtime_client, get_current_time
+from app.utils.text_filter import (
+    remove_thinking_content,
+    should_filter_thinking_content
+)
 from botocore.exceptions import ClientError
 from mypy_boto3_bedrock_runtime.literals import ConversationRoleType, StopReasonType
 from mypy_boto3_bedrock_runtime.type_defs import GuardrailConverseContentBlockTypeDef
@@ -98,9 +102,14 @@ def _content_model_from_partial_content(
     content: _PartialTextContent | _PartialToolUseContent,
 ) -> ContentModel:
     if _is_text_content(content=content):
+        # Apply text filtering to remove thinking content before storage
+        filtered_text = content["text"].rstrip()
+        if should_filter_thinking_content():
+            filtered_text = remove_thinking_content(filtered_text)
+        
         return TextContentModel(
             content_type="text",
-            body=content["text"].rstrip(),
+            body=filtered_text,
         )
 
     elif _is_tool_use_content(content=content):
@@ -322,7 +331,14 @@ class ConverseApiStreamHandler:
                             current_message["contents"][index] = text_content
 
                         if self.on_stream:
-                            self.on_stream(text)
+                            # Filter out thinking content for production
+                            if should_filter_thinking_content():
+                                filtered_text = remove_thinking_content(text)
+                                # Only stream if content remains after filtering
+                                if filtered_text:
+                                    self.on_stream(filtered_text)
+                            else:
+                                self.on_stream(text)
 
                 elif "contentBlockStop" in event:
                     content_block_stop = event["contentBlockStop"]

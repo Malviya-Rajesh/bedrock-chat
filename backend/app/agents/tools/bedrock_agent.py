@@ -7,6 +7,10 @@ from app.agents.tools.agent_tool import AgentTool
 from app.repositories.models.custom_bot import BotModel, AgentModel
 from app.routes.schemas.conversation import type_model_name
 from app.utils import get_bedrock_agent_client, get_bedrock_agent_runtime_client
+from app.utils.text_filter import (
+    remove_thinking_content,
+    should_filter_thinking_content
+)
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -102,24 +106,55 @@ class BedrockAgent:
                             )
 
                     elif type == "text":
-                        if "<thinking>" in formatted_trace.get("text"):
-                            result.append(
-                                {
-                                    "content": json.dumps(
-                                        formatted_trace.get("text"), default=str
-                                    ),
-                                    "source_name": f"[Trance] Agent Thninking({agent_id})",
-                                }
-                            )
+                        text_content = formatted_trace.get("text", "")
+                        
+                        # Skip thinking content entirely in production
+                        if should_filter_thinking_content():
+                            if "<thinking>" in text_content:
+                                # Skip this trace - don't expose thinking
+                                continue
+                            else:
+                                # Clean thinking content and add trace
+                                cleaned_content = remove_thinking_content(
+                                    text_content
+                                )
+                                # Only add if content remains
+                                if cleaned_content:
+                                    result.append(
+                                        {
+                                            "content": json.dumps(
+                                                cleaned_content, default=str
+                                            ),
+                                            "source_name": (
+                                                f"[Trace] Agent ({agent_id})"
+                                            ),
+                                        }
+                                    )
                         else:
-                            result.append(
-                                {
-                                    "content": json.dumps(
-                                        formatted_trace.get("text"), default=str
-                                    ),
-                                    "source_name": f"[Trance] Agent ({agent_id})",
-                                }
-                            )
+                            # Development mode - keep original behavior
+                            if "<thinking>" in text_content:
+                                result.append(
+                                    {
+                                        "content": json.dumps(
+                                            text_content, default=str
+                                        ),
+                                        "source_name": (
+                                            f"[Trace] Agent "
+                                            f"Thinking({agent_id})"
+                                        ),
+                                    }
+                                )
+                            else:
+                                result.append(
+                                    {
+                                        "content": json.dumps(
+                                            text_content, default=str
+                                        ),
+                                        "source_name": (
+                                            f"[Trace] Agent ({agent_id})"
+                                        ),
+                                    }
+                                )
 
             return result
 

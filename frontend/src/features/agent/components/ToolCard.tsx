@@ -15,6 +15,7 @@ import useToolCardExpand from '../hooks/useToolCardExpand';
 import { AgentToolResultContent, RelatedDocument } from '../../../@types/conversation';
 import { getAgentName } from '../functions/formatDescription';
 import RelatedDocumentViewer from '../../../components/RelatedDocumentViewer';
+import { removeThinkingContent, shouldFilterThinkingContent, shouldHideInternalTool } from '../../../utils/textFilter';
 
 // Theme of JSONTree
 // NOTE: need to set the theme as base16 style
@@ -59,6 +60,11 @@ const ToolCard: React.FC<ToolCardProps> = ({
   relatedDocuments,
 }) => {
   const { t } = useTranslation();
+
+  // Hide internal tools like internet search from users
+  if (shouldHideInternalTool(name)) {
+    return null;
+  }
 
   // To avoid re-rendering of all ToolCard components when scrolling, we use a custom hook to manage the expanded state.
   const {

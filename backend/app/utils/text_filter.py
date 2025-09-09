@@ -71,3 +71,29 @@ def should_filter_thinking_content() -> bool:
     # Always filter thinking content for production use
     # This could be made configurable via environment variables if needed
     return True
+
+
+# List of internal tool names that should be hidden from users
+INTERNAL_TOOL_NAMES = {
+    'internet_search',
+    'web_search',
+    'search_internet',
+    'duckduckgo_search',
+    'bing_search',
+    'google_search'
+}
+
+
+def should_hide_internal_tool(tool_name: str) -> bool:
+    """
+    Check if a tool should be hidden from user interface.
+
+    Args:
+        tool_name: Name of the tool to check
+
+    Returns:
+        True if tool should be hidden from users
+    """
+    if not tool_name:
+        return False
+    return tool_name.lower() in INTERNAL_TOOL_NAMES

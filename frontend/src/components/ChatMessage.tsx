@@ -31,7 +31,7 @@ import { convertThinkingLogToAgentToolProps } from '../features/agent/utils/Agen
 import { convertUsedChunkToRelatedDocument } from '../utils/MessageUtils';
 import ReasoningCard from '../features/reasoning/components/ReasoningCard';
 import { ReasoningContext } from '../features/reasoning/xstates/reasoningState';
-import { removeThinkingContent, shouldFilterThinkingContent } from '../utils/textFilter';
+import { removeThinkingContent, shouldFilterThinkingContent, shouldHideInternalTool } from '../utils/textFilter';
 
 type Props = BaseProps & {
   tools?: AgentToolsProps[];
@@ -200,15 +200,34 @@ const ChatMessage: React.FC<Props> = (props) => {
             tools != null &&
             tools.length > 0 && (
               <div className="flex flex-col">
-                {tools.map((tools, index) => (
-                  <div key={index} className="mb-3 mt-0">
-                    <AgentToolList
-                      messageId={chatContent.id}
-                      tools={tools}
-                      relatedDocuments={relatedDocuments}
-                    />
-                  </div>
-                ))}
+                {tools
+                  .filter((toolsItem) => {
+                    // In production mode, filter out tool items that only contain thinking content
+                    if (!shouldFilterThinkingContent()) {
+                      return true; // Show all tools in development
+                    }
+                    
+                    // Check if there's meaningful content after filtering thinking content and internal tools
+                    const hasRunningTools = Object.values(toolsItem.tools).some(tool => 
+                      !shouldHideInternalTool(tool.name) && tool.status === 'running'
+                    );
+                    const hasCompletedTools = Object.values(toolsItem.tools).some(tool => 
+                      !shouldHideInternalTool(tool.name) && (tool.status === 'success' || tool.status === 'error')
+                    );
+                    const hasFilteredThought = toolsItem.thought ? 
+                      removeThinkingContent(toolsItem.thought).trim().length > 0 : false;
+                    
+                    return hasRunningTools || hasCompletedTools || hasFilteredThought;
+                  })
+                  .map((tools, index) => (
+                    <div key={index} className="mb-3 mt-0">
+                      <AgentToolList
+                        messageId={chatContent.id}
+                        tools={tools}
+                        relatedDocuments={relatedDocuments}
+                      />
+                    </div>
+                  ))}
               </div>
             )}
           {chatContent?.role === 'user' && !isEdit && (

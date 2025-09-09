@@ -5,7 +5,7 @@ import { AgentToolsProps } from '../xstates/agentThink';
 import { useTranslation } from 'react-i18next';
 import { PiCircleNotchBold } from 'react-icons/pi';
 import { RelatedDocument } from '../../../@types/conversation';
-import { removeThinkingContent, shouldFilterThinkingContent } from '../../../utils/textFilter';
+import { removeThinkingContent, shouldFilterThinkingContent, shouldHideInternalTool } from '../../../utils/textFilter';
 
 type AgentToolListProps = {
   messageId: string;
@@ -28,6 +28,22 @@ const AgentToolList: React.FC<AgentToolListProps> = ({messageId, tools, relatedD
   // Only show the thought section if there's filtered content remaining
   const shouldShowThought = filteredThought && filteredThought.trim().length > 0;
   
+  // Check if any tools have meaningful content (for production filtering)
+  const hasValidTools = shouldFilterThinkingContent() 
+    ? Object.values(tools.tools).some(tool => 
+        !shouldHideInternalTool(tool.name) && (
+          tool.status === 'running' || 
+          tool.status === 'success' || 
+          tool.status === 'error'
+        )
+      )
+    : Object.values(tools.tools).some(tool => !shouldHideInternalTool(tool.name));
+  
+  // Don't render the component at all if there's no meaningful content in production
+  if (shouldFilterThinkingContent() && !isRunning && !shouldShowThought && !hasValidTools) {
+    return null;
+  }
+  
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col rounded border border-gray bg-aws-paper-light dark:bg-aws-paper-dark text-aws-font-color-light/80 dark:text-aws-font-color-dark/80">
       {(isRunning || shouldShowThought) && (
@@ -44,18 +60,20 @@ const AgentToolList: React.FC<AgentToolListProps> = ({messageId, tools, relatedD
         </div>
       )}
 
-      {Object.entries(tools.tools).map(([toolUseId, toolUse]) => (
-        <ToolCard
-          className=" border-b border-gray last:border-b-0"
-          key={toolUseId}
-          toolUseId={toolUseId}
-          name={toolUse.name}
-          status={toolUse.status}
-          input={toolUse.input}
-          resultContents={toolUse.resultContents}
-          relatedDocuments={toolUse.relatedDocuments}
-        />
-      ))}
+      {Object.entries(tools.tools)
+        .filter(([_, toolUse]) => !shouldHideInternalTool(toolUse.name))
+        .map(([toolUseId, toolUse]) => (
+          <ToolCard
+            className=" border-b border-gray last:border-b-0"
+            key={toolUseId}
+            toolUseId={toolUseId}
+            name={toolUse.name}
+            status={toolUse.status}
+            input={toolUse.input}
+            resultContents={toolUse.resultContents}
+            relatedDocuments={toolUse.relatedDocuments}
+          />
+        ))}
     </div>
   );
 };

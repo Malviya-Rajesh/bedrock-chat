@@ -4,12 +4,18 @@ import { JSONTree } from 'react-json-tree';
 
 import { RelatedDocument } from '../@types/conversation';
 import { getAgentName } from '../features/agent/functions/formatDescription';
+import { shouldHideInternalTool } from '../utils/textFilter';
 
 const RelatedDocumentViewer: React.FC<{
   relatedDocument: Omit<RelatedDocument, 'sourceId'>;
   onClick: () => void;
 }> = (props) => {
   const { t } = useTranslation();
+
+  // Hide documents from internal tools like internet search
+  if (props.relatedDocument.sourceName && shouldHideInternalTool(props.relatedDocument.sourceName)) {
+    return null;
+  }
 
   const content = useMemo(() => (
     props.relatedDocument.content

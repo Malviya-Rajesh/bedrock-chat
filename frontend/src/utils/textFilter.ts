@@ -15,6 +15,28 @@ export function removeThinkingContent(text: string): string {
 }
 
 /**
+ * List of internal tool names that should be hidden from users
+ */
+const INTERNAL_TOOL_NAMES = [
+  'internet_search',
+  'web_search',
+  'search_internet', 
+  'duckduckgo_search',
+  'bing_search',
+  'google_search'
+];
+
+/**
+ * Checks if a tool should be hidden from user interface
+ * @param toolName - Name of the tool to check
+ * @returns True if tool should be hidden
+ */
+export function shouldHideInternalTool(toolName: string): boolean {
+  if (!toolName) return false;
+  return INTERNAL_TOOL_NAMES.includes(toolName.toLowerCase());
+}
+
+/**
  * Checks if text contains thinking content that should be filtered
  * @param text - Input text to check
  * @returns True if text contains thinking tags

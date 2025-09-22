@@ -7,6 +7,7 @@ const translation = {
     },
     app: {
       name: 'Selira Chat',
+      tagline: 'Aman dan Sepenuhnya Dipersonalisasi',
       inputMessage: 'Bisakah Saya Membantu Anda?',
       starredBots: 'Bot Favorit',
       recentlyUsedBots: 'Bot yang Baru Digunakan',

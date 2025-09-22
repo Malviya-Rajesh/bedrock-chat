@@ -20,10 +20,13 @@ const AuthAmplify: React.FC<Props> = ({ socialProviders, children }) => {
         socialProviders={socialProviders}
         components={{
           Header: () => (
-            <div className="mb-8 mt-12 flex justify-center">
+            <div className="mb-8 mt-12 flex flex-col items-center space-y-3">
               <h1 className="bg-gradient-to-r from-aws-sea-blue-light via-aws-aqua to-aws-sea-blue-light bg-clip-text text-5xl font-bold tracking-wide text-transparent drop-shadow-sm">
                 {t('app.name')}
               </h1>
+              <p className="text-center text-lg font-medium text-aws-font-color-gray dark:text-aws-font-color-dark/70">
+                {t('app.tagline')}
+              </p>
             </div>
           ),
         }}>

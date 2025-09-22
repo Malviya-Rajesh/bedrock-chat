@@ -7,6 +7,7 @@ const translation = {
     },
     app: {
       name: 'Selira Chat',
+      tagline: 'Secure & Fully Personalized as per Your Need',
       inputMessage: 'How can I Help You?',
       starredBots: 'Starred Bots',
       recentlyUsedBots: 'Recently Used Bots',

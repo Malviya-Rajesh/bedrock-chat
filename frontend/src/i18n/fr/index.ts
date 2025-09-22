@@ -2,6 +2,7 @@ const translation = {
   translation: {
     app: {
       name: 'Selira Chat',
+      tagline: 'Sécurisé et Entièrement Personnalisé',
       inputMessage: 'Envoyer un message',
       starredBots: 'Epingler un bot',
       recentlyUsedBots: 'Bot utilisé récemment',

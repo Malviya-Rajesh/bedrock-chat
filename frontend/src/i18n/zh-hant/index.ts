@@ -5,6 +5,7 @@ const translation = {
   translation: {
     app: {
       name: 'Selira Chat',
+      tagline: '安全且完全個人化定製',
       inputMessage: '請輸入訊息',
       starredBots: '我的最愛 Bots',
       recentlyUsedBots: '最近用過的 Bots',

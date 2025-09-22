@@ -5,6 +5,7 @@ const translation = {
   translation: {
     app: {
       name: 'Selira Chat',
+      tagline: '안전하고 완전히 개인화된 채팅',
       inputMessage: '입력해 주십시오',
     },
     deleteDialog: {

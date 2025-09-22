@@ -35,6 +35,7 @@ const translation = {
         },
         app: {
           name: 'Selira Chat',
+          tagline: 'Sikker og Fullstendig Personalisert',
           inputMessage: 'Send en melding',
           starredBots: 'Favorittbot',
           recentlyUsedBots: 'Nylig brukte boter',

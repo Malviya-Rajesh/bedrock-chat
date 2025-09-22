@@ -62,3 +62,120 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(202, 202, 202, 0.5);
 }
+
+/* Enhanced AWS Amplify UI Customizations */
+[data-amplify-authenticator] {
+  --amplify-components-authenticator-router-background-color: transparent;
+  --amplify-components-authenticator-router-border-color: transparent;
+}
+
+[data-amplify-authenticator] [data-amplify-router] {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  border: 1px solid rgb(226 232 240);
+  padding: 2rem;
+  max-width: 448px;
+  margin: 0 auto;
+}
+
+.dark [data-amplify-authenticator] [data-amplify-router] {
+  background: rgb(33 33 33);
+  border-color: rgb(64 64 64);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.25), 0 8px 10px -6px rgb(0 0 0 / 0.25);
+}
+
+[data-amplify-authenticator] [data-amplify-tabs] {
+  border-bottom: 2px solid rgb(226 232 240);
+  margin-bottom: 1.5rem;
+}
+
+.dark [data-amplify-authenticator] [data-amplify-tabs] {
+  border-bottom-color: rgb(64 64 64);
+}
+
+[data-amplify-authenticator] [data-amplify-tabs-item][data-state="active"] {
+  color: #007faa;
+  border-bottom-color: #007faa;
+  font-weight: 600;
+}
+
+[data-amplify-authenticator] [data-amplify-field-group] {
+  margin-bottom: 1.5rem;
+}
+
+[data-amplify-authenticator] [data-amplify-field-group]:last-of-type {
+  margin-bottom: 2rem;
+}
+
+[data-amplify-authenticator] [data-amplify-input] {
+  border-radius: 8px;
+  border: 1px solid rgb(203 213 225);
+  padding: 12px 16px;
+  transition: all 0.2s ease-in-out;
+  font-size: 16px;
+}
+
+[data-amplify-authenticator] [data-amplify-input]:focus {
+  border-color: #007faa;
+  box-shadow: 0 0 0 3px rgb(0 127 170 / 0.1);
+  outline: none;
+}
+
+.dark [data-amplify-authenticator] [data-amplify-input] {
+  background: rgb(23 23 23);
+  border-color: rgb(64 64 64);
+  color: rgb(202 202 202);
+}
+
+.dark [data-amplify-authenticator] [data-amplify-input]:focus {
+  border-color: #007faa;
+  background: rgb(33 33 33);
+}
+
+[data-amplify-authenticator] [data-amplify-button][data-variation="primary"] {
+  background: linear-gradient(135deg, #005276 0%, #007faa 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+[data-amplify-authenticator] [data-amplify-button][data-variation="primary"]:hover {
+  background: linear-gradient(135deg, #003550 0%, #005276 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 15px -3px rgb(0 0 0 / 0.2);
+}
+
+[data-amplify-authenticator] [data-amplify-button][data-variation="link"] {
+  color: #007faa;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+[data-amplify-authenticator] [data-amplify-button][data-variation="link"]:hover {
+  color: #005276;
+  text-decoration: underline;
+}
+
+.dark [data-amplify-authenticator] [data-amplify-button][data-variation="link"] {
+  color: #38ef7d;
+}
+
+.dark [data-amplify-authenticator] [data-amplify-button][data-variation="link"]:hover {
+  color: #9ffcea;
+}
+
+/* Authentication container styling */
+body:has([data-amplify-authenticator]) {
+  background: linear-gradient(135deg, rgb(248 250 252) 0%, rgb(241 245 249) 100%);
+  min-height: 100vh;
+}
+
+.dark body:has([data-amplify-authenticator]) {
+  background: linear-gradient(135deg, rgb(21 21 21) 0%, rgb(23 23 23) 100%);
+}

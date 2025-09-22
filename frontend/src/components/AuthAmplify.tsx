@@ -15,17 +15,21 @@ const AuthAmplify: React.FC<Props> = ({ socialProviders, children }) => {
   const { signOut } = useAuthenticator();
 
   return (
-    <Authenticator
-      socialProviders={socialProviders}
-      components={{
-        Header: () => (
-          <div className="mb-5 mt-10 flex justify-center text-3xl text-aws-font-color-light">
-            {t('app.name')}
-          </div>
-        ),
-      }}>
-      <>{cloneElement(children as ReactElement, { signOut })}</>
-    </Authenticator>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-aws-ui-color-dark dark:via-slate-900 dark:to-slate-800">
+      <Authenticator
+        socialProviders={socialProviders}
+        components={{
+          Header: () => (
+            <div className="mb-8 mt-12 flex justify-center">
+              <h1 className="bg-gradient-to-r from-aws-sea-blue-light via-aws-aqua to-aws-sea-blue-light bg-clip-text text-5xl font-bold tracking-wide text-transparent drop-shadow-sm">
+                {t('app.name')}
+              </h1>
+            </div>
+          ),
+        }}>
+        <>{cloneElement(children as ReactElement, { signOut })}</>
+      </Authenticator>
+    </div>
   );
 };
 

@@ -231,11 +231,12 @@ const ChatMessage: React.FC<Props> = (props) => {
               </div>
             )}
           {chatContent?.role === 'user' && !isEdit && (
-            <div>
+            <div className="flex justify-end">
+              <div className="max-w-[80%] bg-blue-100 dark:bg-blue-800/30 rounded-lg px-4 py-3">
               {chatContent.content.some(
                 (content) => content.contentType === 'image'
               ) && (
-                <div key="images" className={chatContent?.role === 'user' ? 'text-right' : ''}>
+                <div key="images">
                   {chatContent.content.map((content, idx) => {
                     if (content.contentType === 'image') {
                       const imageUrl = `data:${content.mediaType};base64,${content.body}`;
@@ -257,7 +258,7 @@ const ChatMessage: React.FC<Props> = (props) => {
               {chatContent.content.some(
                 (content) => content.contentType === 'attachment'
               ) && (
-                <div key="files" className={`my-2 flex ${chatContent?.role === 'user' ? 'justify-end' : ''}`}>
+                <div key="files" className="my-2 flex">
                   {chatContent.content.map((content, idx) => {
                     if (content.contentType === 'attachment') {
                       const isTextFile = TEXT_FILE_EXTENSIONS.some((ext) =>
@@ -297,7 +298,7 @@ const ChatMessage: React.FC<Props> = (props) => {
                   if (content.contentType === 'text') {
                     return (
                       <React.Fragment key={idx}>
-                        <div className={`group relative ${chatContent?.role === 'user' ? 'text-right' : ''}`}>
+                        <div className="group relative">
                           {chatContent?.role === 'user' && !isEdit && (
                             <ButtonIcon
                               className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-dark-gray dark:text-light-gray"
@@ -312,7 +313,7 @@ const ChatMessage: React.FC<Props> = (props) => {
                             </ButtonIcon>
                           )}
                           {content.body.split('\n').map((c, idxBody) => (
-                            <div key={idxBody} className={`${chatContent?.role === 'user' ? 'text-right' : ''}`}>{c}</div>
+                            <div key={idxBody}>{c}</div>
                           ))}
                         </div>
                       </React.Fragment>
@@ -346,24 +347,30 @@ const ChatMessage: React.FC<Props> = (props) => {
                 </div>
               </ModalDialog>
             </div>
+              </div>
           )}
           {isEdit && (
-            <div>
-              <Textarea
-                className={`bg-transparent ${chatContent?.role === 'user' ? 'text-right' : ''}`}
-                value={changedContent}
-                noBorder
-                onChange={(v) => setChangedContent(v)}
-              />
-              <div className="flex justify-center gap-3">
-                <Button onClick={onSubmit}>{t('button.SaveAndSubmit')}</Button>
-                <Button
-                  outlined
-                  onClick={() => {
-                    setIsEdit(false);
-                  }}>
-                  {t('button.cancel')}
-                </Button>
+            <div className={chatContent?.role === 'user' ? 'flex justify-end' : ''}>
+              <div className={chatContent?.role === 'user' 
+                ? 'max-w-[80%] bg-blue-100 dark:bg-blue-800/30 rounded-lg px-4 py-3' 
+                : 'w-full'
+              }>
+                <Textarea
+                  className="bg-transparent"
+                  value={changedContent}
+                  noBorder
+                  onChange={(v) => setChangedContent(v)}
+                />
+                <div className="flex justify-center gap-3">
+                  <Button onClick={onSubmit}>{t('button.SaveAndSubmit')}</Button>
+                  <Button
+                    outlined
+                    onClick={() => {
+                      setIsEdit(false);
+                    }}>
+                    {t('button.cancel')}
+                  </Button>
+                </div>
               </div>
             </div>
           )}

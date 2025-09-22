@@ -6,7 +6,7 @@ const translation = {
       },
     },
     app: {
-      name: 'Bedrock Chat',
+      name: 'Selira Chat',
       inputMessage: 'Bolehkah Saya Membantu Anda?',
       starredBots: 'Bot Berbintang',
       recentlyUsedBots: 'Bot Yang Baru Digunakan',

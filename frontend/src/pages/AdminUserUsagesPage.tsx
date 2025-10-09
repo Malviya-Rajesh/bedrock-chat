@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ListPageLayout from '../layouts/ListPageLayout';
 import InputText from '../components/InputText';
@@ -44,19 +44,28 @@ const AdminUserUsagesPage: React.FC = () => {
     []
   );
 
+  const normalize = useCallback((value?: number | null) => {
+    return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+  }, []);
+
+  const formatCurrency = useCallback(
+    (value?: number | null) => formatter.format(normalize(value)),
+    [formatter, normalize]
+  );
+
   const sortedUsages = useMemo(() => {
     if (!userUsages) {
       return undefined;
     }
     const order = isDescCost ? -1 : 1;
     return [...userUsages].sort((a, b) =>
-      a.totalPrice === b.totalPrice
+      normalize(a.totalPrice) === normalize(b.totalPrice)
         ? 0
-        : a.totalPrice > b.totalPrice
+        : normalize(a.totalPrice) > normalize(b.totalPrice)
         ? order
         : order * -1
     );
-  }, [isDescCost, userUsages]);
+  }, [isDescCost, normalize, userUsages]);
 
   return (
     <ListPageLayout
@@ -136,7 +145,7 @@ const AdminUserUsagesPage: React.FC = () => {
       <div className="flex flex-col gap-3">
         {sortedUsages?.map((usage) => {
           const botEntries = Object.entries(usage.botTotals ?? {}).sort(
-            (a, b) => b[1] - a[1]
+            (a, b) => normalize(b[1]) - normalize(a[1])
           );
           return (
             <div
@@ -151,14 +160,14 @@ const AdminUserUsagesPage: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold">
-                    {formatter.format(usage.totalPrice)}
+                    {formatCurrency(usage.totalPrice)}
                   </div>
                   {usage.periodTotalPrice !== undefined && (
                     <div className="text-xs">
                       {t('admin.userUsages.label.periodTotal', {
                         defaultValue: 'Selected period total',
                       })}
-                      : {formatter.format(usage.periodTotalPrice ?? 0)}
+                      : {formatCurrency(usage.periodTotalPrice)}
                     </div>
                   )}
                   {usage.updatedAt && (
@@ -180,7 +189,7 @@ const AdminUserUsagesPage: React.FC = () => {
                     })}
                   </div>
                   <div className="text-base">
-                    {formatter.format(usage.normalChatTotal)}
+                    {formatCurrency(usage.normalChatTotal)}
                   </div>
                 </div>
                 <div>
@@ -205,7 +214,7 @@ const AdminUserUsagesPage: React.FC = () => {
                             {botId}
                           </span>
                           <span className="whitespace-nowrap font-medium">
-                            {formatter.format(total)}
+                            {formatCurrency(total)}
                           </span>
                         </li>
                       ))}

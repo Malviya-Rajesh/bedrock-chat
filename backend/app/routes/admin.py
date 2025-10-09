@@ -16,6 +16,7 @@ from app.routes.schemas.admin import (
 )
 from app.routes.schemas.bot import Knowledge
 from app.usecases.bot import modify_pinning_status
+from app.usecases.user import get_user_usage
 from app.user import User
 from fastapi import APIRouter, Depends, Request
 
@@ -98,14 +99,22 @@ async def get_users(
     """
     users = await find_users_sorted_by_price(limit=limit, from_=start, to_=end)
 
-    return [
-        UsagePerUserOutput(
-            id=user.id,
-            email=user.email,
-            total_price=user.total_price,
+    outputs: list[UsagePerUserOutput] = []
+    for user in users:
+        usage_summary = get_user_usage(user.id)
+        outputs.append(
+            UsagePerUserOutput(
+                id=user.id,
+                email=user.email,
+                total_price=usage_summary.total_price,
+                normal_chat_total=usage_summary.normal_chat_total,
+                bot_totals=usage_summary.bot_totals,
+                updated_at=usage_summary.updated_at,
+                period_total_price=user.total_price,
+            )
         )
-        for user in users
-    ]
+
+    return outputs
 
 
 @router.get("/admin/bot/public/{bot_id}", response_model=PublicBotOutput)

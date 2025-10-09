@@ -39,6 +39,10 @@ class UsagePerUserOutput(BaseSchema):
     id: str = Field(..., description="user_id")
     email: str
     total_price: float
+    normal_chat_total: float
+    bot_totals: dict[str, float]
+    updated_at: float | None = None
+    period_total_price: float | None = None
 
 
 class PublicBotOutput(BaseSchema):

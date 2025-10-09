@@ -1,3 +1,5 @@
+from app.repositories.conversation import get_user_usage_summary
+from app.repositories.models.conversation import UserUsageModel
 from app.repositories.user import (
     find_group_by_name_prefix,
     find_user_by_id,
@@ -18,3 +20,7 @@ def search_group_by_name_prefix(prefix: str) -> list[UserGroup]:
 
 def get_user_by_id(id: str) -> UserWithoutGroups | None:
     return find_user_by_id(id=id)
+
+
+def get_user_usage(id: str) -> UserUsageModel:
+    return get_user_usage_summary(user_id=id)

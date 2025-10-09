@@ -21,9 +21,11 @@ from app.repositories.models.conversation import (
     MessageModel,
     RelatedDocumentModel,
     ToolResultModel,
+    UserUsageModel,
 )
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
+from app.utils import get_current_time
 from pydantic import TypeAdapter
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,85 @@ LARGE_MESSAGE_BUCKET = os.environ.get("LARGE_MESSAGE_BUCKET")
 
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-east-1")
 s3_client = boto3.client("s3", BEDROCK_REGION)
+USER_USAGE_SK = "USAGE#SUMMARY"
+
+
+def increment_user_total_price(
+    user_id: str, amount: float, bot_id: str | None
+) -> None:
+    if amount <= 0:
+        logger.debug(
+            "Skipping user usage update because amount is non-positive: %s", amount
+        )
+        return
+
+    table = get_conversation_table_client(user_id)
+    decimal_amount = decimal(str(amount))
+    current_time = decimal(str(get_current_time()))
+
+    update_parts = [
+        "TotalPrice = if_not_exists(TotalPrice, :zero) + :amount",
+        "UpdatedAt = :updatedAt",
+    ]
+
+    expression_attribute_names: dict[str, str] | None = None
+    if bot_id:
+        expression_attribute_names = {"#botId": bot_id}
+        update_parts.append(
+            "BotTotals.#botId = if_not_exists(BotTotals.#botId, :zero) + :amount"
+        )
+    else:
+        update_parts.append(
+            "NormalChatTotal = if_not_exists(NormalChatTotal, :zero) + :amount"
+        )
+
+    update_expression = "SET " + ", ".join(update_parts)
+    expression_attribute_values = {
+        ":zero": decimal("0"),
+        ":amount": decimal_amount,
+        ":updatedAt": current_time,
+    }
+
+    update_kwargs = {
+        "Key": {"PK": user_id, "SK": USER_USAGE_SK},
+        "UpdateExpression": update_expression,
+        "ExpressionAttributeValues": expression_attribute_values,
+    }
+
+    if expression_attribute_names:
+        update_kwargs["ExpressionAttributeNames"] = expression_attribute_names
+
+    table.update_item(**update_kwargs)
+
+
+def get_user_usage_summary(user_id: str) -> UserUsageModel:
+    table = get_conversation_table_client(user_id)
+
+    response = table.get_item(Key={"PK": user_id, "SK": USER_USAGE_SK})
+    item = response.get("Item")
+    if not item:
+        return UserUsageModel(
+            total_price=0.0,
+            normal_chat_total=0.0,
+            bot_totals={},
+            updated_at=None,
+        )
+
+    total_price = float(item.get("TotalPrice", decimal("0")))
+    normal_chat_total = float(item.get("NormalChatTotal", decimal("0")))
+    bot_totals_raw = item.get("BotTotals") or {}
+    bot_totals = {
+        bot_id: float(total) for bot_id, total in bot_totals_raw.items()
+    }
+    updated_at_raw = item.get("UpdatedAt")
+    updated_at = float(updated_at_raw) if updated_at_raw is not None else None
+
+    return UserUsageModel(
+        total_price=total_price,
+        normal_chat_total=normal_chat_total,
+        bot_totals=bot_totals,
+        updated_at=updated_at,
+    )
 
 
 def store_conversation(

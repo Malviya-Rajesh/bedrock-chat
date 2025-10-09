@@ -13,6 +13,7 @@ from app.prompt import build_rag_prompt, get_prompt_to_cite_tool_results
 from app.repositories.conversation import (
     RecordNotFoundError,
     find_conversation_by_id,
+    increment_user_total_price,
     store_conversation,
     store_related_documents,
 )
@@ -360,7 +361,14 @@ def chat(
         message = result["message"]
         stop_reason = result["stop_reason"]
 
-        conversation.total_price += result["price"]
+        price_delta = result["price"]
+        conversation.total_price += price_delta
+        if price_delta > 0:
+            increment_user_total_price(
+                user.id,
+                price_delta,
+                bot.id if bot else conversation.bot_id,
+            )
         conversation.should_continue = stop_reason == "max_tokens"
 
         if stop_reason != "tool_use":  # Tool use converged

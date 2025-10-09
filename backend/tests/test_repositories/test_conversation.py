@@ -3,6 +3,8 @@ import json
 import os
 import sys
 import unittest
+from decimal import Decimal
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, ".")
@@ -15,6 +17,8 @@ from app.repositories.conversation import (
     delete_conversation_by_user_id,
     find_conversation_by_id,
     find_conversation_by_user_id,
+    get_user_usage_summary,
+    increment_user_total_price,
     store_conversation,
     update_feedback,
 )
@@ -203,7 +207,7 @@ class TestConversationRepository(unittest.TestCase):
         self.assertEqual(content[1].content_type, "image")
         # Convert the raw bytes to base64 for comparison
         self.assertEqual(
-            base64.b64encode(content[1].body).decode(),
+            base64.b64encode(cast(bytes, content[1].body)).decode(),
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
         )
         self.assertEqual(message_map["a"].model, "claude-v3-haiku")
@@ -278,6 +282,62 @@ class TestConversationRepository(unittest.TestCase):
         delete_conversation_by_user_id(user_id="user")
         conversations = find_conversation_by_user_id(user_id="user")
         self.assertEqual(len(conversations), 0)
+
+    def test_increment_user_total_price_updates_normal_chat(self):
+        self.mock_table.update_item.reset_mock()
+
+        with patch("app.repositories.conversation.get_current_time", return_value=1700000000.0):
+            increment_user_total_price(user_id="user", amount=1.23, bot_id=None)
+
+        self.mock_table.update_item.assert_called_once()
+        call_kwargs = self.mock_table.update_item.call_args.kwargs
+
+        self.assertEqual(call_kwargs["Key"], {"PK": "user", "SK": "USAGE#SUMMARY"})
+        self.assertIn("NormalChatTotal", call_kwargs["UpdateExpression"])
+        self.assertNotIn("ExpressionAttributeNames", call_kwargs)
+        self.assertEqual(call_kwargs["ExpressionAttributeValues"][":amount"], Decimal("1.23"))
+        self.assertEqual(call_kwargs["ExpressionAttributeValues"][":updatedAt"], Decimal("1700000000.0"))
+
+    def test_increment_user_total_price_updates_bot_total(self):
+        self.mock_table.update_item.reset_mock()
+
+        with patch("app.repositories.conversation.get_current_time", return_value=1700000000.0):
+            increment_user_total_price(user_id="user", amount=4.5, bot_id="bot-123")
+
+        self.mock_table.update_item.assert_called_once()
+        call_kwargs = self.mock_table.update_item.call_args.kwargs
+
+        self.assertIn("BotTotals.#botId", call_kwargs["UpdateExpression"])
+        self.assertEqual(call_kwargs["ExpressionAttributeNames"], {"#botId": "bot-123"})
+        self.assertEqual(call_kwargs["ExpressionAttributeValues"][":amount"], Decimal("4.5"))
+
+    def test_get_user_usage_summary_returns_defaults(self):
+        self.mock_table.get_item.return_value = {}
+
+        summary = get_user_usage_summary(user_id="user")
+
+        self.assertEqual(summary.total_price, 0.0)
+        self.assertEqual(summary.normal_chat_total, 0.0)
+        self.assertEqual(summary.bot_totals, {})
+        self.assertIsNone(summary.updated_at)
+
+    def test_get_user_usage_summary_parses_values(self):
+        self.mock_table.get_item.return_value = {
+            "Item": {
+                "TotalPrice": Decimal("10.5"),
+                "NormalChatTotal": Decimal("6.0"),
+                "BotTotals": {"bot-1": Decimal("2.5"), "bot-2": Decimal("2.0")},
+                "UpdatedAt": Decimal("1700000000.0"),
+            }
+        }
+
+        summary = get_user_usage_summary(user_id="user")
+
+        self.assertEqual(summary.total_price, 10.5)
+        self.assertEqual(summary.normal_chat_total, 6.0)
+        self.assertEqual(summary.bot_totals["bot-1"], 2.5)
+        self.assertEqual(summary.bot_totals["bot-2"], 2.0)
+        self.assertEqual(summary.updated_at, 1700000000.0)
 
     def test_store_and_find_large_conversation(self):
         large_message_map = {

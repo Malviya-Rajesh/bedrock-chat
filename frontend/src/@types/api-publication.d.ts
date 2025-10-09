@@ -108,8 +108,14 @@ export type GetUserUsagesRequest = {
   end?: string;
 };
 
-export type GetUserUsagesResponse = {
+export type UserUsageSummary = {
   id: string;
   email: string;
   totalPrice: number;
-}[];
+  normalChatTotal: number;
+  botTotals: Record<string, number>;
+  updatedAt?: number | null;
+  periodTotalPrice?: number | null;
+};
+
+export type GetUserUsagesResponse = UserUsageSummary[];

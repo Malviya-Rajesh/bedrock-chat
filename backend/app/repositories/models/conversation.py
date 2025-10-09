@@ -718,34 +718,6 @@ class RelatedDocumentModel(BaseModel):
     source_link: str | None = None
     page_number: int | None = None
 
-    def to_tool_result_model(self, display_citation: bool) -> ToolResultModel:
-        if isinstance(self.content, TextToolResultModel):
-            if display_citation:
-                return JsonToolResultModel(
-                    json={
-                        "source_id": self.source_id,
-                        "content": self.content.text,
-                    },
-                )
-
-            else:
-                return self.content
-
-        elif isinstance(self.content, JsonToolResultModel):
-            if display_citation:
-                return JsonToolResultModel(
-                    json={
-                        "source_id": self.source_id,
-                        "content": self.content.json_,
-                    },
-                )
-
-            else:
-                return self.content
-
-        else:
-            return self.content
-
     def get_source_link_for_schema(self) -> str | None:
         if self.source_link is None:
             return None
@@ -771,3 +743,10 @@ class RelatedDocumentModel(BaseModel):
             source_link=self.get_source_link_for_schema(),
             page_number=self.page_number,
         )
+
+
+class UserUsageModel(BaseModel):
+    total_price: float
+    normal_chat_total: float
+    bot_totals: dict[str, float] = Field(default_factory=dict)
+    updated_at: float | None = None

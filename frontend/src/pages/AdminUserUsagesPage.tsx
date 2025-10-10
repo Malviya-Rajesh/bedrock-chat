@@ -39,7 +39,8 @@ const AdminUserUsagesPage: React.FC = () => {
       new Intl.NumberFormat(undefined, {
         style: 'currency',
         currency: 'USD',
-        minimumFractionDigits: 2,
+        minimumFractionDigits: 5,
+        maximumFractionDigits: 5,
       }),
     []
   );
@@ -181,46 +182,34 @@ const AdminUserUsagesPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-3 grid gap-3 md:grid-cols-2">
-                <div>
-                  <div className="text-sm font-semibold">
-                    {t('admin.userUsages.label.normalChatTotal', {
-                      defaultValue: 'Normal chat total',
+              <div className="mt-3">
+                <div className="text-sm font-semibold">
+                  {t('admin.userUsages.label.botTotals', {
+                    defaultValue: 'Bot usage totals',
+                  })}
+                </div>
+                {botEntries.length === 0 ? (
+                  <div className="text-sm text-aws-font-color-light/70 dark:text-aws-font-color-dark/70">
+                    {t('admin.userUsages.label.noBotTotals', {
+                      defaultValue: 'No bot usage yet.',
                     })}
                   </div>
-                  <div className="text-base">
-                    {formatCurrency(usage.normalChatTotal)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-semibold">
-                    {t('admin.userUsages.label.botTotals', {
-                      defaultValue: 'Bot usage totals',
-                    })}
-                  </div>
-                  {botEntries.length === 0 ? (
-                    <div className="text-sm text-aws-font-color-light/70 dark:text-aws-font-color-dark/70">
-                      {t('admin.userUsages.label.noBotTotals', {
-                        defaultValue: 'No bot usage yet.',
-                      })}
-                    </div>
-                  ) : (
-                    <ul className="flex flex-col gap-1 text-sm">
-                      {botEntries.map(([botId, total]) => (
-                        <li
-                          key={botId}
-                          className="flex items-center justify-between gap-2 rounded bg-aws-paper-light/70 px-2 py-1 text-xs dark:bg-aws-paper-dark/70">
-                          <span className="truncate" title={botId}>
-                            {botId}
-                          </span>
-                          <span className="whitespace-nowrap font-medium">
-                            {formatCurrency(total)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                ) : (
+                  <ul className="flex flex-col gap-1 text-sm">
+                    {botEntries.map(([botId, total]) => (
+                      <li
+                        key={botId}
+                        className="flex items-center justify-between gap-2 rounded bg-aws-paper-light/70 px-2 py-1 text-xs dark:bg-aws-paper-dark/70">
+                        <span className="truncate" title={botId}>
+                          {botId}
+                        </span>
+                        <span className="whitespace-nowrap font-medium">
+                          {formatCurrency(total)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           );

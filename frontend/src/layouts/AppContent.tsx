@@ -1,9 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { fetchAuthSession } from 'aws-amplify/auth';
+import axios from 'axios';
 import Drawer from '../components/Drawer';
 import { BaseProps } from '../@types/common';
 import { ConversationMeta } from '../@types/conversation';
 import LazyOutputText from '../components/LazyOutputText';
-import { PiList } from 'react-icons/pi';
+import Button from '../components/Button';
+import { PiArrowClockwiseBold, PiList } from 'react-icons/pi';
 import SnackbarProvider from '../providers/SnackbarProvider';
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -24,8 +27,13 @@ type Props = BaseProps & {
   signOut?: () => void;
 };
 
+type BalanceResponse = {
+  userId: string;
+  balance: string | number;
+};
+
 const AppContent: React.FC<Props> = (props) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getPageLabel } = usePageLabel();
   const { switchOpen: switchDrawer } = useDrawer();
   const navigate = useNavigate();
@@ -81,6 +89,97 @@ const AppContent: React.FC<Props> = (props) => {
   const [isOpenSelectLanguage, setIsOpenSelectLanguage] = useState(false);
   const [isOpenDrawerOptions, setIsOpenDrawerOptions] = useState(false);
   const { drawerOptions, setDrawerOptions } = useDrawer();
+  const [balanceInfo, setBalanceInfo] = useState<BalanceResponse | null>(null);
+  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+  const balanceEndpoint = import.meta.env.VITE_APP_BALANCE_API_ENDPOINT;
+  const isBalanceConfigured = Boolean(balanceEndpoint);
+
+  const balanceFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+      }),
+    []
+  );
+
+  const formattedBalance = useMemo(() => {
+    if (!balanceInfo) {
+      return '--';
+    }
+    const { balance } = balanceInfo;
+    if (balance === null || balance === undefined) {
+      return '--';
+    }
+    const numericBalance = Number(balance);
+    if (Number.isFinite(numericBalance)) {
+      return balanceFormatter.format(numericBalance);
+    }
+    return String(balance);
+  }, [balanceFormatter, balanceInfo]);
+
+  const balanceDisplay = useMemo(() => {
+    if (!isBalanceConfigured) {
+      return t('user.balance.unavailable', { defaultValue: 'N/A' });
+    }
+    return formattedBalance;
+  }, [formattedBalance, isBalanceConfigured, t]);
+
+  const refreshDisabledReason = useMemo(() => {
+    if (!isBalanceConfigured) {
+      return t('user.balance.notConfigured', {
+        defaultValue: 'Balance endpoint is not configured.',
+      });
+    }
+    return undefined;
+  }, [isBalanceConfigured, t]);
+
+  const handleRefreshBalance = useCallback(async () => {
+    if (!balanceEndpoint) {
+      setBalanceError(
+        t('user.balance.notConfigured', {
+          defaultValue: 'Balance endpoint is not configured.',
+        })
+      );
+      return;
+    }
+    setIsBalanceLoading(true);
+    setBalanceError(null);
+    try {
+      const { tokens } = await fetchAuthSession();
+      const idToken = tokens?.idToken?.toString();
+      if (!idToken) {
+        throw new Error(
+          t('user.balance.missingToken', {
+            defaultValue: 'Authentication token not found.',
+          })
+        );
+      }
+
+      const response = await axios.get<BalanceResponse>(balanceEndpoint, {
+        headers: {
+          Authorization: idToken,
+          Accept: 'application/json',
+        },
+      });
+
+      setBalanceInfo(response.data);
+      setBalanceError(null);
+    } catch (error) {
+      console.error('Failed to fetch balance', error);
+      setBalanceError(
+        t('user.balance.fetchFailed', {
+          defaultValue: 'Unable to refresh balance.',
+        })
+      );
+      setBalanceInfo(null);
+    } finally {
+      setIsBalanceLoading(false);
+    }
+  }, [balanceEndpoint, t]);
 
   return (
     <div className="relative flex h-dvh w-screen bg-aws-paper-light dark:bg-aws-paper-dark">
@@ -165,8 +264,36 @@ const AppContent: React.FC<Props> = (props) => {
             )}
           </div>
 
-          <div className="flex items-center justify-end text-sm font-medium min-w-0 w-32">
-            Hi, {userFirstName}
+          <div className="flex min-w-[14rem] items-center justify-end gap-3 text-sm font-medium">
+            <div className="flex flex-col items-end leading-tight">
+              <div>Hi, {userFirstName}</div>
+              <div
+                className="text-xs font-normal"
+                title={balanceError ?? undefined}>
+                {t('user.balance.label', { defaultValue: 'Balance' })}:{' '}
+                <span className="font-semibold">{balanceDisplay}</span>
+              </div>
+              {balanceError && (
+                <div className="text-[10px] font-normal text-red-200">
+                  {balanceError}
+                </div>
+              )}
+            </div>
+            <span
+              className="inline-flex"
+              title={refreshDisabledReason ?? undefined}>
+              <Button
+                className="h-8 px-2 text-xs"
+                outlined
+                loading={isBalanceLoading}
+                disabled={!isBalanceConfigured || isBalanceLoading}
+                onClick={() => {
+                  void handleRefreshBalance();
+                }}
+                rightIcon={<PiArrowClockwiseBold />}>
+                {t('common.refresh', { defaultValue: 'Refresh' })}
+              </Button>
+            </span>
           </div>
         </header>
 

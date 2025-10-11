@@ -51,7 +51,7 @@ type Props = BaseProps & {
     enableReasoning: boolean,
     base64EncodedImages?: string[],
     attachments?: AttachmentType[]
-  ) => void;
+  ) => boolean | void | Promise<boolean | void>;
   onRegenerate: (enableReasoning: boolean) => void;
   continueGenerate: () => void;
   supportReasoning: boolean;
@@ -199,6 +199,18 @@ const InputChatContent = forwardRef<HTMLElement, Props>(
 
     const inputRef = useRef<HTMLDivElement>(null);
 
+    const resetInputState = useCallback(() => {
+      setContent('');
+      clearBase64EncodedImages();
+      clearAttachedFiles();
+      setTotalFileSizeToSend(0);
+    }, [
+      clearAttachedFiles,
+      clearBase64EncodedImages,
+      setContent,
+      setTotalFileSizeToSend,
+    ]);
+
     const sendContent = useCallback(() => {
       const attachments = attachedFiles.map((file) => ({
         fileName: file.name,
@@ -206,7 +218,7 @@ const InputChatContent = forwardRef<HTMLElement, Props>(
         extractedContent: file.content,
       }));
 
-      props.onSend(
+      const result = props.onSend(
         content,
         props.reasoningEnabled,
         !disabledImageUpload && base64EncodedImages.length > 0
@@ -214,17 +226,37 @@ const InputChatContent = forwardRef<HTMLElement, Props>(
           : undefined,
         attachments.length > 0 ? attachments : undefined
       );
-      setContent('');
-      clearBase64EncodedImages();
-      clearAttachedFiles();
+
+      const handleResult = (value: boolean | void | undefined) => {
+        if (value === false) {
+          return;
+        }
+        resetInputState();
+      };
+
+      if (result && typeof (result as PromiseLike<boolean | void>).then === 'function') {
+        (result as Promise<boolean | void>)
+          .then(handleResult)
+          .catch((error) => {
+            console.error('Failed to send message', error);
+            open(
+              t('error.failedToSendMessage', {
+                defaultValue: 'Unable to send message.',
+              })
+            );
+          });
+      } else {
+        handleResult(result as boolean | void | undefined);
+      }
     }, [
       base64EncodedImages,
       attachedFiles,
-      clearBase64EncodedImages,
-      clearAttachedFiles,
       content,
       disabledImageUpload,
+      open,
       props,
+      resetInputState,
+      t,
     ]);
 
     const encodeAndPushImage = useCallback(

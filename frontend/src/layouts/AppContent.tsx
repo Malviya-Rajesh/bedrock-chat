@@ -1,6 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchAuthSession } from 'aws-amplify/auth';
-import axios from 'axios';
 import Drawer from '../components/Drawer';
 import { BaseProps } from '../@types/common';
 import { ConversationMeta } from '../@types/conversation';
@@ -22,17 +20,16 @@ import DialogConfirmClearConversations from '../components/DialogConfirmClearCon
 import DialogSelectLanguage from '../components/DialogSelectLanguage';
 import useLocalStorage from '../hooks/useLocalStorage';
 import DialogDrawerOptions from '../components/DialogDrawerOptions';
+import {
+  BalanceProvider,
+  useBalance,
+} from '../contexts/BalanceContext';
 
 type Props = BaseProps & {
   signOut?: () => void;
 };
 
-type BalanceResponse = {
-  userId: string;
-  balance: string | number;
-};
-
-const AppContent: React.FC<Props> = (props) => {
+const AppContentInner: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation();
   const { getPageLabel } = usePageLabel();
   const { switchOpen: switchDrawer } = useDrawer();
@@ -89,11 +86,14 @@ const AppContent: React.FC<Props> = (props) => {
   const [isOpenSelectLanguage, setIsOpenSelectLanguage] = useState(false);
   const [isOpenDrawerOptions, setIsOpenDrawerOptions] = useState(false);
   const { drawerOptions, setDrawerOptions } = useDrawer();
-  const [balanceInfo, setBalanceInfo] = useState<BalanceResponse | null>(null);
-  const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [balanceError, setBalanceError] = useState<string | null>(null);
-  const balanceEndpoint = import.meta.env.VITE_APP_BALANCE_API_ENDPOINT;
-  const isBalanceConfigured = Boolean(balanceEndpoint);
+  const {
+    balanceInfo,
+    balance,
+    isLoading: isBalanceLoading,
+    error: balanceError,
+    isConfigured: isBalanceConfigured,
+    refresh,
+  } = useBalance();
 
   const balanceFormatter = useMemo(
     () =>
@@ -110,16 +110,15 @@ const AppContent: React.FC<Props> = (props) => {
     if (!balanceInfo) {
       return '--';
     }
-    const { balance } = balanceInfo;
-    if (balance === null || balance === undefined) {
+    const rawBalance = balanceInfo.balance;
+    if (rawBalance === null || rawBalance === undefined) {
       return '--';
     }
-    const numericBalance = Number(balance);
-    if (Number.isFinite(numericBalance)) {
-      return balanceFormatter.format(numericBalance);
+    if (balance !== null) {
+      return balanceFormatter.format(balance);
     }
-    return String(balance);
-  }, [balanceFormatter, balanceInfo]);
+    return String(rawBalance);
+  }, [balance, balanceFormatter, balanceInfo]);
 
   const balanceDisplay = useMemo(() => {
     if (!isBalanceConfigured) {
@@ -136,50 +135,6 @@ const AppContent: React.FC<Props> = (props) => {
     }
     return undefined;
   }, [isBalanceConfigured, t]);
-
-  const handleRefreshBalance = useCallback(async () => {
-    if (!balanceEndpoint) {
-      setBalanceError(
-        t('user.balance.notConfigured', {
-          defaultValue: 'Balance endpoint is not configured.',
-        })
-      );
-      return;
-    }
-    setIsBalanceLoading(true);
-    setBalanceError(null);
-    try {
-      const { tokens } = await fetchAuthSession();
-      const idToken = tokens?.idToken?.toString();
-      if (!idToken) {
-        throw new Error(
-          t('user.balance.missingToken', {
-            defaultValue: 'Authentication token not found.',
-          })
-        );
-      }
-
-      const response = await axios.get<BalanceResponse>(balanceEndpoint, {
-        headers: {
-          Authorization: idToken,
-          Accept: 'application/json',
-        },
-      });
-
-      setBalanceInfo(response.data);
-      setBalanceError(null);
-    } catch (error) {
-      console.error('Failed to fetch balance', error);
-      setBalanceError(
-        t('user.balance.fetchFailed', {
-          defaultValue: 'Unable to refresh balance.',
-        })
-      );
-      setBalanceInfo(null);
-    } finally {
-      setIsBalanceLoading(false);
-    }
-  }, [balanceEndpoint, t]);
 
   return (
     <div className="relative flex h-dvh w-screen bg-aws-paper-light dark:bg-aws-paper-dark">
@@ -288,7 +243,7 @@ const AppContent: React.FC<Props> = (props) => {
                 loading={isBalanceLoading}
                 disabled={!isBalanceConfigured || isBalanceLoading}
                 onClick={() => {
-                  void handleRefreshBalance();
+                  void refresh();
                 }}
                 rightIcon={<PiArrowClockwiseBold />}>
                 {t('common.refresh', { defaultValue: 'Refresh' })}
@@ -306,6 +261,14 @@ const AppContent: React.FC<Props> = (props) => {
         </div>
       </main>
     </div>
+  );
+};
+
+const AppContent: React.FC<Props> = (props) => {
+  return (
+    <BalanceProvider>
+      <AppContentInner {...props} />
+    </BalanceProvider>
   );
 };
 

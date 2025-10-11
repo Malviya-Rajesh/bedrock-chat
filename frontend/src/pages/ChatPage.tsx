@@ -54,6 +54,10 @@ import Skeleton from '../components/Skeleton.tsx';
 import { twMerge } from 'tailwind-merge';
 import ButtonStar from '../components/ButtonStar.tsx';
 import MenuBot from '../components/MenuBot.tsx';
+import {
+  useBalance,
+  parseNumericBalance,
+} from '../contexts/BalanceContext';
 
 // Default model activation settings when no bot is selected
 const defaultActiveModels: ActiveModels = (() => {
@@ -62,6 +66,8 @@ const defaultActiveModels: ActiveModels = (() => {
   ) as ActiveModels;
 })();
 
+const MINIMUM_REQUIRED_BALANCE = 0.05;
+
 const ChatPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -69,6 +75,11 @@ const ChatPage: React.FC = () => {
   const { errorDetail } = usePostMessageStreaming();
   const { isAdmin } = useLoginUser();
   const { pinBot, unpinBot } = useBotPinning();
+  const {
+    balance,
+    refresh: refreshBalance,
+    isConfigured: isBalanceConfigured,
+  } = useBalance();
 
   const {
     agentThinking,
@@ -186,15 +197,52 @@ const ChatPage: React.FC = () => {
       base64EncodedImages?: string[],
       attachments?: AttachmentType[]
     ) => {
-      postChat({
-        content,
-        base64EncodedImages,
-        attachments,
-        bot: inputBotParams,
-        enableReasoning,
-      });
+      return (async () => {
+        if (isBalanceConfigured) {
+          const latest = await refreshBalance();
+          const latestBalance = parseNumericBalance(latest?.balance);
+          const effectiveBalance =
+            latestBalance !== null ? latestBalance : balance;
+
+          if (effectiveBalance === null) {
+            openSnackbar(
+              t('user.balance.checkFailed', {
+                defaultValue: 'Unable to verify balance. Please try again.',
+              })
+            );
+            return false;
+          }
+
+          if (effectiveBalance < MINIMUM_REQUIRED_BALANCE) {
+            openSnackbar(
+              t('user.balance.insufficient', {
+                defaultValue: 'Not enough balance to send message.',
+              })
+            );
+            return false;
+          }
+        }
+
+        postChat({
+          content,
+          base64EncodedImages,
+          attachments,
+          bot: inputBotParams,
+          enableReasoning,
+        });
+
+        return true;
+      })();
     },
-    [inputBotParams, postChat]
+    [
+      balance,
+      inputBotParams,
+      isBalanceConfigured,
+      openSnackbar,
+      postChat,
+      refreshBalance,
+      t,
+    ]
   );
 
   const onChangeCurrentMessageId = useCallback(

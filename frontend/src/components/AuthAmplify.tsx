@@ -18,6 +18,43 @@ const AuthAmplify: React.FC<Props> = ({ socialProviders, children }) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-aws-ui-color-dark dark:via-slate-900 dark:to-slate-800">
       <Authenticator
         socialProviders={socialProviders}
+        loginMechanisms={['email']}
+        signUpAttributes={['email', 'given_name', 'family_name', 'phone_number']}
+        formFields={{
+          signUp: {
+            email: {
+              order: 1,
+              label: t('auth.signUp.emailLabel', { defaultValue: 'Email address' }),
+            },
+            given_name: {
+              order: 2,
+              label: t('auth.signUp.firstNameLabel', { defaultValue: 'First name' }),
+              isRequired: true,
+            },
+            family_name: {
+              order: 3,
+              label: t('auth.signUp.lastNameLabel', { defaultValue: 'Last name' }),
+              isRequired: true,
+              placeholder: t('auth.signUp.lastNamePlaceholder', { defaultValue: 'Last Name' }),
+            },
+            phone_number: {
+              order: 4,
+              label: t('auth.signUp.phoneNumberLabel', { defaultValue: 'Mobile number' }),
+              isRequired: true,
+              placeholder: '',
+            },
+            password: {
+              order: 5,
+              label: t('auth.signUp.passwordLabel', { defaultValue: 'Password' }),
+            },
+            confirm_password: {
+              order: 6,
+              label: t('auth.signUp.confirmPasswordLabel', {
+                defaultValue: 'Confirm password',
+              }),
+            },
+          },
+        }}
         components={{
           Header: () => (
             <div className="mb-8 mt-12 flex flex-col items-center space-y-3">

@@ -30,12 +30,19 @@ const normalizeBots = (data?: RawAccessibleBotResponse): AccessibleBot[] => {
     }));
 };
 
-const useAccessibleBots = () => {
+const useAccessibleBots = (enabled = true) => {
   const [bots, setBots] = useState<AccessibleBot[] | undefined>();
   const [error, setError] = useState<Error | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    if (!enabled) {
+      setBots(undefined);
+      setError(undefined);
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
 
     const fetchBots = async () => {
@@ -90,7 +97,7 @@ const useAccessibleBots = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [enabled]);
 
   return {
     bots,

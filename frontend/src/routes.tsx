@@ -16,7 +16,6 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { useMemo } from 'react';
-import BotDiscoverPage from './features/discover/pages/BotDiscoverPage.tsx';
 import BotRecentlyUsedPage from './pages/BotRecentlyUsedPage.tsx';
 import BotStarredPage from './pages/BotStarredPage.tsx';
 import ConversationHistoryPage from './pages/ConversationHistoryPage.tsx';
@@ -37,10 +36,6 @@ const rootChildren = [
   {
     path: '/bot/starred',
     element: <BotStarredPage />,
-  },
-  {
-    path: '/bot/discover',
-    element: <BotDiscoverPage />,
   },
   {
     path: '/bot/new',
@@ -107,7 +102,6 @@ export const usePageLabel = () => {
   const { t } = useTranslation();
   const pageLabel: { path: (typeof allPaths)[number]; label: string }[] = [
     { path: '/bot/my', label: t('bot.my.label.pageTitle') },
-    { path: '/bot/discover', label: t('discover.pageTitle') },
     {
       path: '/admin/shared-bot-analytics',
       label: t('admin.botAnalytics.label.pageTitle'),

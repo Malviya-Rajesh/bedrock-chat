@@ -481,6 +481,8 @@ How would you categorize this email?`,
             'This bot is shared and accessible to other users. Shared users can find and use this bot through the <Link>Discover Bot</Link> page.',
           linkDescription:
             'You can also chat with the bot using this shared link.',
+          contentShared:
+            'This bot is shared and accessible to other users. Shared users can find and use this bot when it is shared with them.',
         },
         button: {
           manage: 'Manage',

@@ -16,7 +16,6 @@ import {
   PiChat,
   PiChatCenteredDotsDuotone,
   PiCheck,
-  PiCompass,
   PiListBullets,
   PiNotePencil,
   PiPencilLine,
@@ -300,13 +299,6 @@ const Drawer: React.FC<Props> = (props) => {
                   to="/"
                   onClick={onClickNewChat}
                   labelComponent={t('button.newChat')}
-                />
-                <DrawerItem
-                  isActive={false}
-                  icon={<PiCompass />}
-                  to="/bot/discover"
-                  labelComponent={getPageLabel('/bot/discover')}
-                  onClick={closeSmallDrawer}
                 />
               </div>
 

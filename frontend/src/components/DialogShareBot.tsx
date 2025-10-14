@@ -8,7 +8,7 @@ import React, {
 import { BaseProps } from '../@types/common';
 import Button from './Button';
 import ModalDialog from './ModalDialog';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { SharedScope } from '../@types/bot';
 import Toggle from './Toggle';
 import { copyBotUrl, getBotUrl, isPinnedBot } from '../utils/BotUtils';
@@ -216,21 +216,12 @@ const DialogShareBot: React.FC<Props> = (props) => {
 
           <div className="my-3 flex w-full items-center text-xs">
             <div className="w-full">
-              {props.sharedScope === 'private' ? (
-                t('bot.shareDialog.off.content')
-              ) : (
-                <Trans
-                  i18nKey="bot.shareDialog.on.content"
-                  components={{
-                    Link: (
-                      <a
-                        href="/bot/discover"
-                        className="italic text-aws-sea-blue-light underline dark:text-aws-sea-blue-dark"
-                      />
-                    ),
-                  }}
-                />
-              )}
+              {props.sharedScope === 'private'
+                ? t('bot.shareDialog.off.content')
+                : t('bot.shareDialog.on.contentShared', {
+                    defaultValue:
+                      'This bot is shared and accessible to other users. Shared users can find and use this bot when it is shared with them.',
+                  })}
             </div>
           </div>
 

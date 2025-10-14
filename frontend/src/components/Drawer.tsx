@@ -41,6 +41,7 @@ import Button from './Button';
 import Skeleton from './Skeleton';
 import { isPinnedBot } from '../utils/BotUtils';
 import IconPinnedBot from './IconPinnedBot';
+import useAccessibleBots from '../hooks/useAccessibleBots';
 
 type Props = BaseProps & {
   isAdmin: boolean;
@@ -203,6 +204,11 @@ const Drawer: React.FC<Props> = (props) => {
   const { getPageLabel } = usePageLabel();
   const { opened, switchOpen, drawerOptions } = useDrawer();
   const { conversations, starredBots, recentlyUsedUnstarredBots } = props;
+  const {
+    bots: accessibleBots,
+    error: accessibleBotsError,
+    isLoading: isLoadingAccessibleBots,
+  } = useAccessibleBots();
 
   const location = useLocation();
 
@@ -304,6 +310,39 @@ const Drawer: React.FC<Props> = (props) => {
                   onClick={closeSmallDrawer}
                 />
               </div>
+
+              <ExpandableDrawerGroup
+                label={t('bot.label.myBots')}
+                className="border-t border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20 mt-2 pt-3 pb-2"
+                isDefaultShow={false}>
+                {isLoadingAccessibleBots && (
+                  <div className="flex flex-col gap-2 p-2">
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                    <Skeleton className="h-10 w-full bg-aws-sea-blue-light/50 dark:bg-aws-sea-blue-dark/50" />
+                  </div>
+                )}
+                {accessibleBotsError && (
+                  <div className="px-4 py-2 text-xs text-red-200">
+                    {accessibleBotsError.message}
+                  </div>
+                )}
+                {accessibleBots && accessibleBots.length === 0 && !isLoadingAccessibleBots && !accessibleBotsError && (
+                  <div className="px-4 py-2 text-xs italic text-aws-font-color-white-light/70 dark:text-aws-font-color-white-dark/70">
+                    {t('bot.label.noBots')}
+                  </div>
+                )}
+                {accessibleBots?.map((bot) => (
+                  <DrawerItem
+                    key={bot.id}
+                    isActive={botId === bot.id && !conversationId}
+                    to={`/bot/${bot.id}`}
+                    icon={<PiRobot />}
+                    labelComponent={bot.title}
+                    onClick={onClickNewBotChat}
+                  />
+                ))}
+              </ExpandableDrawerGroup>
 
               <ExpandableDrawerGroup
                 label={t('app.starredBots')}

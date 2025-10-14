@@ -1,101 +1,66 @@
-import os
+import boto3
 import requests
 import json
-from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
 
-# Resolve .env file next to this script so local runs pick up values without extra setup.
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DOTENV_PATH = os.path.join(SCRIPT_DIR, ".env")
-DOTENV_LOCAL_PATH = os.path.join(SCRIPT_DIR, ".env.local")
+# === CONFIGURATION ===
+COGNITO_REGION = "us-east-1"
+USER_POOL_ID = "us-east-1_HpHVOpRN1"
+CLIENT_ID = "6qnt1gk6jj2roa8lgggofbjdvo"
+API_GATEWAY_URL = "https://3nwepy67gk.execute-api.us-east-1.amazonaws.com/GetBots"  # include /default if stage name exists
 
-# ----------------------------
-# Load config from environment variables
-# ----------------------------
-if os.path.exists(DOTENV_LOCAL_PATH):
-    load_dotenv(dotenv_path=DOTENV_LOCAL_PATH)
-else:
-    load_dotenv(dotenv_path=DOTENV_PATH)
-CASHFREE_CLIENT_ID = os.getenv("CASHFREE_CLIENT_ID")
-print("CASHFREE_CLIENT_ID:", CASHFREE_CLIENT_ID)
-CASHFREE_CLIENT_SECRET = os.getenv("CASHFREE_CLIENT_SECRET")
-print("CASHFREE_CLIENT_SECRET:", "****" if CASHFREE_CLIENT_SECRET else None)
-API_VERSION = os.getenv("API_VERSION", "2022-09-01")  # default if not set
-NOTIFY_URL = os.getenv("NOTIFY_URL")
-BASE_URL = os.getenv("BASE_URL", "https://sandbox.cashfree.com/pg/links")  # default sandbox
+# === USER CREDENTIALS ===
+USERNAME = "malviyamalviya27@gmail.com"
+PASSWORD = "#52548Malviya"
 
-# Customer details
-CUSTOMER_EMAIL = "mrmalviyalalit@gmail.com"
-CUSTOMER_NAME = "Lalit Malviya"
-CUSTOMER_PHONE = "8949463461"
+# === STEP 1: Authenticate with Cognito ===
+client = boto3.client("cognito-idp", region_name=COGNITO_REGION)
 
-# Payment link info
-AMOUNT = 12.00
-LINK_ID = f"wallet_topup_{int(datetime.now().timestamp())}"  # unique ID
-LINK_PURPOSE = "Payment for Wallet Top-Up"
+try:
+    resp = client.initiate_auth(
+        AuthFlow="USER_PASSWORD_AUTH",
+        AuthParameters={
+            "USERNAME": USERNAME,
+            "PASSWORD": PASSWORD
+        },
+        ClientId=CLIENT_ID
+    )
+except client.exceptions.NotAuthorizedException:
+    print("❌ Invalid username or password.")
+    exit(1)
+except client.exceptions.UserNotConfirmedException:
+    print("❌ User not confirmed in Cognito.")
+    exit(1)
+except Exception as e:
+    print(f"❌ Authentication failed: {e}")
+    exit(1)
 
-# --- Proper ISO8601 expiry with timezone (30 days later) ---
-expiry_time = (datetime.now(timezone.utc) + timedelta(days=30)).astimezone()
-EXPIRY = expiry_time.strftime("%Y-%m-%dT%H:%M:%S%z")
-EXPIRY = EXPIRY[:-2] + ":" + EXPIRY[-2:]  # convert +0530 → +05:30
+# === STEP 2: Extract the JWT token ===
+id_token = resp["AuthenticationResult"]["IdToken"]
+print("✅ Successfully logged in.")
 
-# Webhook and return URL
-RETURN_URL = "https://example.com/success"
-
-# ----------------------------
-# Request setup
-# ----------------------------
+# === STEP 3: Call the API Gateway endpoint ===
 headers = {
-    "Content-Type": "application/json",
-    "x-client-id": CASHFREE_CLIENT_ID,
-    "x-client-secret": CASHFREE_CLIENT_SECRET,
-    "x-api-version": API_VERSION
+    "Authorization": id_token,
+    "Content-Type": "application/json"
 }
 
-payload = {
-    "customer_details": {
-        "customer_email": CUSTOMER_EMAIL,
-        "customer_name": CUSTOMER_NAME,
-        "customer_phone": CUSTOMER_PHONE,
-        "customer_id": "6408b458-b091-70c2-f3ac-9a11bdd8b03b"
-    },
-    "link_amount": AMOUNT,
-    "link_currency": "INR",
-    "link_id": LINK_ID,
-    "link_purpose": LINK_PURPOSE,
-    "link_expiry_time": EXPIRY,
-    "link_auto_reminders": True,
-    "link_partial_payments": False,
-    "link_notify": {
-        "send_email": True,
-        "send_sms": False
-    },
-    "link_meta": {
-        "notify_url": NOTIFY_URL,
-        "return_url": RETURN_URL,
-        "upi_intent": False
-    },
-    "link_notes": {
-        "note_1": "Wallet Top-Up",
-        "note_2": "Test transaction"
-    }
-}
+try:
+    # Use GET instead of POST
+    api_response = requests.get(API_GATEWAY_URL, headers=headers)
+    api_response.raise_for_status()
+except requests.exceptions.HTTPError as errh:
+    print("HTTP Error:", errh)
+    print(api_response.text)
+    exit(1)
+except requests.exceptions.RequestException as err:
+    print("Request Error:", err)
+    exit(1)
 
-# ----------------------------
-# Send request
-# ----------------------------
-response = requests.post(BASE_URL, headers=headers, data=json.dumps(payload))
-
-print("Status Code:", response.status_code)
-print("Response:", response.text)
-
-if response.status_code == 200:
-    data = response.json()
-    payment_link = data.get("link_url")
-    if payment_link:
-        print("\n✅ Payment link created successfully!")
-        print("🔗 Link:", payment_link)
-    else:
-        print("⚠️ No payment link found in response.")
-else:
-    print("❌ Failed to create payment link.")
+# === STEP 4: Parse and display response ===
+try:
+    data = api_response.json()
+    print("\n✅ API Response:\n")
+    print(json.dumps(data, indent=2))
+except json.JSONDecodeError:
+    print("❌ Failed to parse API response as JSON:")
+    print(api_response.text)

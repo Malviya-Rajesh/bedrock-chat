@@ -7,6 +7,7 @@ import {
   PiArrowClockwiseBold,
   PiDotsThreeVertical,
   PiList,
+  PiPlusCircleBold,
   PiSidebar,
   PiSignOut,
   PiTranslate,
@@ -33,6 +34,7 @@ import {
   BalanceProvider,
   useBalance,
 } from '../contexts/BalanceContext';
+import useSnackbar from '../hooks/useSnackbar';
 
 type Props = BaseProps & {
   signOut?: () => void;
@@ -56,6 +58,7 @@ const AppContentInner: React.FC<Props> = (props) => {
   const { isConversationOrNewChat, pathPattern } = usePageTitlePathPattern();
   const { isAdmin, userFirstName, userName } = useLoginUser();
   const [theme, setTheme] = useLocalStorage('theme', 'light');
+  const { open: openSnackbar } = useSnackbar();
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
@@ -321,22 +324,45 @@ const AppContentInner: React.FC<Props> = (props) => {
                     <div className="text-xs uppercase tracking-wide text-white/60 dark:text-white/70">
                       {t('user.balance.label', { defaultValue: 'Balance' })}
                     </div>
-                    <button
-                      type="button"
-                      className={`${amountButtonClassName} text-base`}
-                      disabled={!canRefreshBalance}
-                      onClick={() => {
-                        if (!canRefreshBalance) {
-                          return;
-                        }
-                        void refresh();
-                      }}
-                      title={amountTitle ?? undefined}>
-                      <span>{balanceDisplay}</span>
-                      {isBalanceLoading && (
-                        <PiArrowClockwiseBold className="h-4 w-4 animate-spin" />
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className={`${amountButtonClassName} text-base`}
+                        disabled={!canRefreshBalance}
+                        onClick={() => {
+                          if (!canRefreshBalance) {
+                            return;
+                          }
+                          void refresh();
+                        }}
+                        title={amountTitle ?? undefined}>
+                        <span>{balanceDisplay}</span>
+                        {isBalanceLoading && (
+                          <PiArrowClockwiseBold className="h-4 w-4 animate-spin" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-full p-1 text-white/80 transition hover:text-white hover:bg-white/10 focus:outline-none focus-visible:ring-1"
+                        title={t('user.balance.add', {
+                          defaultValue: 'Add balance (coming soon)',
+                        })}
+                        aria-label={t('user.balance.add', {
+                          defaultValue: 'Add balance (coming soon)',
+                        })}
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          openSnackbar(
+                            t('user.balance.addUnavailable', {
+                              defaultValue:
+                                'Adding amount is not available yet. Please contact Selira Team.',
+                            }),
+                            'info'
+                          );
+                        }}>
+                        <PiPlusCircleBold className="h-4 w-4" />
+                      </button>
+                    </div>
                     {balanceError && (
                       <div className="text-xs text-red-200" role="alert">
                         {balanceError}

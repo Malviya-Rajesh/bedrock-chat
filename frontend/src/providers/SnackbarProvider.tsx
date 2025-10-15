@@ -1,5 +1,10 @@
-import React, { useEffect } from 'react';
-import { PiWarningFill, PiX } from 'react-icons/pi';
+import React, { useEffect, useMemo } from 'react';
+import {
+  PiInfo,
+  PiWarningCircleFill,
+  PiX,
+  PiXCircleFill,
+} from 'react-icons/pi';
 import ButtonIcon from '../components/ButtonIcon';
 import useSnackbar from '../hooks/useSnackbar';
 import { Transition } from '@headlessui/react';
@@ -9,7 +14,29 @@ type Props = {
 };
 
 const SnackbarProvider: React.FC<Props> = ({ children }) => {
-  const { isOpen, close, message } = useSnackbar();
+  const { isOpen, close, message, severity } = useSnackbar();
+
+  const appearance = useMemo(() => {
+    switch (severity) {
+      case 'warning':
+        return {
+          containerClass:
+            'bg-amber-500 text-aws-squid-ink-light dark:text-aws-font-color-white-dark',
+          Icon: PiWarningCircleFill,
+        };
+      case 'error':
+        return {
+          containerClass: 'bg-red text-aws-font-color-white-light',
+          Icon: PiXCircleFill,
+        };
+      default:
+        return {
+          containerClass:
+            'bg-aws-squid-ink-dark text-aws-font-color-white-light',
+          Icon: PiInfo,
+        };
+    }
+  }, [severity]);
 
   useEffect(() => {
     if (isOpen) {
@@ -32,9 +59,10 @@ const SnackbarProvider: React.FC<Props> = ({ children }) => {
           leaveFrom="opacity-100 scale-100 "
           leaveTo="opacity-0 scale-95 ">
           <div className="">
-            <div className="mx-4 mt-4 flex justify-between rounded bg-red p-3  text-sm text-aws-font-color-white-light shadow-lg">
-              <div className="mr-3 text-3xl">
-                <PiWarningFill />
+            <div
+              className={`mx-4 mt-4 flex justify-between rounded p-3 text-sm shadow-lg ${appearance.containerClass}`}>
+              <div className="mr-3 text-2xl">
+                <appearance.Icon />
               </div>
               <div className="grow">{message}</div>
               <div className="-mr-2 -mt-2">

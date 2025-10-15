@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Drawer from '../components/Drawer';
 import { BaseProps } from '../@types/common';
 import { ConversationMeta } from '../@types/conversation';
 import LazyOutputText from '../components/LazyOutputText';
-import { PiArrowClockwiseBold, PiList } from 'react-icons/pi';
+import { PiArrowClockwiseBold, PiDotsThreeVertical, PiList } from 'react-icons/pi';
 import SnackbarProvider from '../providers/SnackbarProvider';
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,7 @@ const AppContentInner: React.FC<Props> = (props) => {
   const { starredBots, recentlyUsedUnstarredBots } = useBot();
   const { newChat, isGeneratedTitle } = useChat();
   const { isConversationOrNewChat, pathPattern } = usePageTitlePathPattern();
-  const { isAdmin, userFirstName } = useLoginUser();
+  const { isAdmin, userFirstName, userName } = useLoginUser();
   const [theme] = useLocalStorage('theme', 'light');
   useEffect(() => {
     document.documentElement.className = theme;
@@ -161,6 +161,40 @@ const AppContentInner: React.FC<Props> = (props) => {
       : `${baseClass} cursor-not-allowed opacity-70`;
   }, [canRefreshBalance]);
 
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node) &&
+        !userMenuButtonRef.current?.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsUserMenuOpen(false);
+  }, [conversationId, pathPattern]);
+
   return (
     <div className="relative flex h-dvh w-screen bg-aws-paper-light dark:bg-aws-paper-dark">
       <Drawer
@@ -232,31 +266,66 @@ const AppContentInner: React.FC<Props> = (props) => {
 
           <div className="flex-1" />
 
-          <div className="flex min-w-[14rem] items-center justify-end gap-3 text-sm font-medium">
-            <div className="flex flex-col items-end leading-tight">
-              <div>Hi, {userFirstName}</div>
-              <div className="text-xs font-normal">
-                {t('user.balance.label', { defaultValue: 'Balance' })}:{' '}
-                <button
-                  type="button"
-                  className={amountButtonClassName}
-                  disabled={!canRefreshBalance}
-                  onClick={() => {
-                    if (!canRefreshBalance) {
-                      return;
-                    }
-                    void refresh();
-                  }}
-                  title={amountTitle ?? undefined}>
-                  <span>{balanceDisplay}</span>
-                  {isBalanceLoading && (
-                    <PiArrowClockwiseBold className="h-3 w-3 animate-spin" />
-                  )}
-                </button>
-              </div>
-              {balanceError && (
-                <div className="text-[10px] font-normal text-red-200">
-                  {balanceError}
+          <div className="flex w-32 items-center justify-end">
+            <div className="relative">
+              <button
+                ref={userMenuButtonRef}
+                type="button"
+                className="rounded-full p-2 hover:brightness-125 focus:outline-none focus:ring-1"
+                title={t('user.menu.account', { defaultValue: 'Account menu' })}
+                aria-haspopup="menu"
+                aria-expanded={isUserMenuOpen}
+                onClick={() => {
+                  setIsUserMenuOpen((open) => !open);
+                }}>
+                <PiDotsThreeVertical className="text-xl" />
+              </button>
+
+              {isUserMenuOpen && (
+                <div
+                  ref={userMenuRef}
+                  className="absolute right-0 mt-2 w-56 rounded-md border border-aws-font-color-white-light/40 bg-aws-squid-ink-light p-3 text-sm shadow-lg focus:outline-none dark:border-aws-font-color-white-dark/40 dark:bg-aws-squid-ink-dark"
+                  role="menu">
+                  <div className="flex flex-col gap-1 border-b border-white/10 pb-2">
+                    <div className="text-xs uppercase tracking-wide text-white/60 dark:text-white/70">
+                      {t('user.menu.signedInAs', { defaultValue: 'Signed in as' })}
+                    </div>
+                    <div className="text-base font-semibold text-white dark:text-white">
+                      {userFirstName || userName || t('user.anonymous', { defaultValue: 'User' })}
+                    </div>
+                    {userName && userName !== userFirstName && (
+                      <div className="truncate text-xs text-white/70 dark:text-white/70">
+                        {userName}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex flex-col gap-1">
+                    <div className="text-xs uppercase tracking-wide text-white/60 dark:text-white/70">
+                      {t('user.balance.label', { defaultValue: 'Balance' })}
+                    </div>
+                    <button
+                      type="button"
+                      className={`${amountButtonClassName} text-base`}
+                      disabled={!canRefreshBalance}
+                      onClick={() => {
+                        if (!canRefreshBalance) {
+                          return;
+                        }
+                        void refresh();
+                      }}
+                      title={amountTitle ?? undefined}>
+                      <span>{balanceDisplay}</span>
+                      {isBalanceLoading && (
+                        <PiArrowClockwiseBold className="h-4 w-4 animate-spin" />
+                      )}
+                    </button>
+                    {balanceError && (
+                      <div className="text-xs text-red-200" role="alert">
+                        {balanceError}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

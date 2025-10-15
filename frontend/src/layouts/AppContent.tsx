@@ -3,7 +3,15 @@ import Drawer from '../components/Drawer';
 import { BaseProps } from '../@types/common';
 import { ConversationMeta } from '../@types/conversation';
 import LazyOutputText from '../components/LazyOutputText';
-import { PiArrowClockwiseBold, PiDotsThreeVertical, PiList } from 'react-icons/pi';
+import {
+  PiArrowClockwiseBold,
+  PiDotsThreeVertical,
+  PiList,
+  PiSidebar,
+  PiSignOut,
+  PiTranslate,
+  PiTrash,
+} from 'react-icons/pi';
 import SnackbarProvider from '../providers/SnackbarProvider';
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +27,8 @@ import DialogConfirmClearConversations from '../components/DialogConfirmClearCon
 import DialogSelectLanguage from '../components/DialogSelectLanguage';
 import useLocalStorage from '../hooks/useLocalStorage';
 import DialogDrawerOptions from '../components/DialogDrawerOptions';
+import Toggle from '../components/Toggle';
+import { IoMoonSharp, IoSunnyOutline } from 'react-icons/io5';
 import {
   BalanceProvider,
   useBalance,
@@ -45,10 +55,12 @@ const AppContentInner: React.FC<Props> = (props) => {
   const { newChat, isGeneratedTitle } = useChat();
   const { isConversationOrNewChat, pathPattern } = usePageTitlePathPattern();
   const { isAdmin, userFirstName, userName } = useLoginUser();
-  const [theme] = useLocalStorage('theme', 'light');
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
+
+  const isDarkTheme = theme === 'dark';
 
   const [isOpenDeleteChat, setIsOpenDeleteChat] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<
@@ -160,6 +172,11 @@ const AppContentInner: React.FC<Props> = (props) => {
       ? `${baseClass} hover:underline focus:underline cursor-pointer`
       : `${baseClass} cursor-not-allowed opacity-70`;
   }, [canRefreshBalance]);
+
+  const themeToggleLabel = useMemo(
+    () => (isDarkTheme ? t('button.mode.dark', { defaultValue: 'Dark mode' }) : t('button.mode.light', { defaultValue: 'Light mode' })),
+    [isDarkTheme, t]
+  );
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -284,7 +301,7 @@ const AppContentInner: React.FC<Props> = (props) => {
               {isUserMenuOpen && (
                 <div
                   ref={userMenuRef}
-                  className="absolute right-0 mt-2 w-56 rounded-md border border-aws-font-color-white-light/40 bg-aws-squid-ink-light p-3 text-sm shadow-lg focus:outline-none dark:border-aws-font-color-white-dark/40 dark:bg-aws-squid-ink-dark"
+                  className="absolute right-0 z-40 mt-2 w-56 rounded-md border border-aws-font-color-white-light/40 bg-aws-squid-ink-light p-3 text-sm shadow-lg focus:outline-none dark:border-aws-font-color-white-dark/40 dark:bg-aws-squid-ink-dark"
                   role="menu">
                   <div className="flex flex-col gap-1 border-b border-white/10 pb-2">
                     <div className="text-xs uppercase tracking-wide text-white/60 dark:text-white/70">
@@ -326,12 +343,80 @@ const AppContentInner: React.FC<Props> = (props) => {
                       </div>
                     )}
                   </div>
+
+                  <div className="mt-4 space-y-1 border-t border-white/10 pt-2">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 rounded px-2 py-2 text-left hover:bg-aws-squid-ink-dark/40 focus:outline-none focus-visible:ring-1"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        setIsOpenDrawerOptions(true);
+                      }}>
+                      <PiSidebar className="text-lg" />
+                      <span>{t('button.drawerOption', { defaultValue: 'Side Menu Options' })}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 rounded px-2 py-2 text-left hover:bg-aws-squid-ink-dark/40 focus:outline-none focus-visible:ring-1"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        setIsOpenSelectLanguage(true);
+                      }}>
+                      <PiTranslate className="text-lg" />
+                      <span>{t('button.language', { defaultValue: 'Language' })}</span>
+                    </button>
+
+                    <div className="flex w-full items-center justify-between gap-2 rounded px-2 py-2 hover:bg-aws-squid-ink-dark/40 focus-within:outline-none">
+                      <div className="flex items-center gap-2">
+                        {isDarkTheme ? (
+                          <IoMoonSharp className="text-lg" />
+                        ) : (
+                          <IoSunnyOutline className="text-lg" />
+                        )}
+                        <span>{t('button.mode', { defaultValue: 'Mode' })}</span>
+                      </div>
+                      <Toggle
+                        value={isDarkTheme}
+                        aria-label={themeToggleLabel}
+                        onChange={(next) => {
+                          setTheme(next ? 'dark' : 'light');
+                        }}
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 rounded px-2 py-2 text-left hover:bg-aws-squid-ink-dark/40 focus:outline-none focus-visible:ring-1"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        setIsOpenClearConversations(true);
+                      }}>
+                      <PiTrash className="text-lg" />
+                      <span>{t('button.clearConversation', {
+                        defaultValue: 'Delete all conversations',
+                      })}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 rounded px-2 py-2 text-left hover:bg-aws-squid-ink-dark/40 focus:outline-none focus-visible:ring-1"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        if (props.signOut) {
+                          props.signOut();
+                        }
+                      }}>
+                      <PiSignOut className="text-lg" />
+                      <span>{t('button.signOut', { defaultValue: 'Sign out' })}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center px-4 text-center">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center px-4 text-center">
             <div className="pointer-events-auto">
               {isGeneratedTitle ? (
                 <>

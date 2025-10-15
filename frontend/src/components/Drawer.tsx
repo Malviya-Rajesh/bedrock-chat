@@ -31,7 +31,6 @@ import { ConversationMeta } from '../@types/conversation';
 import { BotListItem } from '../@types/bot';
 import useChat from '../hooks/useChat';
 import { useTranslation } from 'react-i18next';
-import Menu from './Menu';
 import DrawerItem from './DrawerItem';
 import ExpandableDrawerGroup from './ExpandableDrawerGroup';
 import { usePageLabel } from '../routes';
@@ -519,39 +518,31 @@ const Drawer: React.FC<Props> = (props) => {
           )}
 
           {/* Bottom menu */}
-          <div
-            className={twMerge(
-              'absolute bottom-0 left-0 right-0 z-10 flex flex-col items-start border-t border-aws-font-color-white-light/20 dark:border-aws-font-color-white-dark/20 bg-aws-squid-ink-light dark:bg-aws-ui-color-dark',
-              props.isAdmin ? 'h-20' : 'h-10'
-            )}>
-            {props.isAdmin && !isAdminPanel && (
-              <DrawerItem
-                className="w-60"
-                isActive={false}
-                icon={<PiPresentationChart />}
-                to="/admin/shared-bot-analytics"
-                labelComponent={t('app.adminConsoles')}
-                onClick={closeSmallDrawer}
-              />
-            )}
-            {isAdminPanel && (
-              <DrawerItem
-                className="w-60"
-                isActive={false}
-                icon={<PiChatCenteredDotsDuotone />}
-                to="/"
-                labelComponent={t('app.backChat')}
-                onClick={closeSmallDrawer}
-              />
-            )}
-            <Menu
-              className="mx-2 flex h-10 w-60 justify-start"
-              onSignOut={props.onSignOut}
-              onSelectLanguage={props.onSelectLanguage}
-              onClearConversations={props.onClearConversations}
-              onClickDrawerOptions={props.onClickDrawerOptions}
-            />
-          </div>
+          {(props.isAdmin || isAdminPanel) && (
+            <div
+              className="absolute bottom-0 left-0 right-0 z-10 flex flex-col items-start border-t border-aws-font-color-white-light/20 bg-aws-squid-ink-light py-1 dark:border-aws-font-color-white-dark/20 dark:bg-aws-ui-color-dark">
+              {props.isAdmin && !isAdminPanel && (
+                <DrawerItem
+                  className="w-60"
+                  isActive={false}
+                  icon={<PiPresentationChart />}
+                  to="/admin/shared-bot-analytics"
+                  labelComponent={t('app.adminConsoles')}
+                  onClick={closeSmallDrawer}
+                />
+              )}
+              {isAdminPanel && (
+                <DrawerItem
+                  className="w-60"
+                  isActive={false}
+                  icon={<PiChatCenteredDotsDuotone />}
+                  to="/"
+                  labelComponent={t('app.backChat')}
+                  onClick={closeSmallDrawer}
+                />
+              )}
+            </div>
+          )}
         </nav>
       </div>
     </>

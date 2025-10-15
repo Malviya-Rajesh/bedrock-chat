@@ -3,7 +3,6 @@ import Drawer from '../components/Drawer';
 import { BaseProps } from '../@types/common';
 import { ConversationMeta } from '../@types/conversation';
 import LazyOutputText from '../components/LazyOutputText';
-import Button from '../components/Button';
 import { PiArrowClockwiseBold, PiList } from 'react-icons/pi';
 import SnackbarProvider from '../providers/SnackbarProvider';
 import { Outlet } from 'react-router-dom';
@@ -136,6 +135,32 @@ const AppContentInner: React.FC<Props> = (props) => {
     return undefined;
   }, [isBalanceConfigured, t]);
 
+  const canRefreshBalance = isBalanceConfigured && !isBalanceLoading;
+
+  const amountTitle = useMemo(() => {
+    if (balanceError) {
+      return balanceError;
+    }
+    if (!isBalanceConfigured) {
+      return refreshDisabledReason;
+    }
+    if (isBalanceLoading) {
+      return t('user.balance.refreshing', {
+        defaultValue: 'Refreshing balance...',
+      });
+    }
+    return t('user.balance.clickToRefresh', {
+      defaultValue: 'Click to refresh balance.',
+    });
+  }, [balanceError, isBalanceConfigured, isBalanceLoading, refreshDisabledReason, t]);
+
+  const amountButtonClassName = useMemo(() => {
+    const baseClass = 'font-semibold inline-flex items-center gap-1 focus:outline-none bg-transparent border-0 p-0 text-current';
+    return canRefreshBalance
+      ? `${baseClass} hover:underline focus:underline cursor-pointer`
+      : `${baseClass} cursor-not-allowed opacity-70`;
+  }, [canRefreshBalance]);
+
   return (
     <div className="relative flex h-dvh w-screen bg-aws-paper-light dark:bg-aws-paper-dark">
       <Drawer
@@ -194,7 +219,7 @@ const AppContentInner: React.FC<Props> = (props) => {
       />
 
       <main className="relative flex min-h-dvh flex-1 flex-col overflow-y-hidden transition-width">
-        <header className="visible flex h-14 w-full items-center bg-aws-squid-ink-light px-3 py-2 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark">
+        <header className="relative visible flex h-14 w-full items-center bg-aws-squid-ink-light px-3 py-2 text-lg text-aws-font-color-white-light dark:bg-aws-squid-ink-dark dark:text-aws-font-color-white-dark">
           <div className="flex items-center min-w-0 w-32">
             <button
               className="rounded-full p-2 hover:brightness-75 focus:outline-none focus:ring-1 transition-all"
@@ -205,28 +230,29 @@ const AppContentInner: React.FC<Props> = (props) => {
             </button>
           </div>
 
-          <div className="flex-1 flex items-center justify-center text-center px-4">
-            {isGeneratedTitle ? (
-              <>
-                <LazyOutputText text={getTitle(conversationId ?? '')} />
-              </>
-            ) : (
-              <>
-                {isConversationOrNewChat
-                  ? getTitle(conversationId ?? '')
-                  : getPageLabel(pathPattern)}
-              </>
-            )}
-          </div>
+          <div className="flex-1" />
 
           <div className="flex min-w-[14rem] items-center justify-end gap-3 text-sm font-medium">
             <div className="flex flex-col items-end leading-tight">
               <div>Hi, {userFirstName}</div>
-              <div
-                className="text-xs font-normal"
-                title={balanceError ?? undefined}>
+              <div className="text-xs font-normal">
                 {t('user.balance.label', { defaultValue: 'Balance' })}:{' '}
-                <span className="font-semibold">{balanceDisplay}</span>
+                <button
+                  type="button"
+                  className={amountButtonClassName}
+                  disabled={!canRefreshBalance}
+                  onClick={() => {
+                    if (!canRefreshBalance) {
+                      return;
+                    }
+                    void refresh();
+                  }}
+                  title={amountTitle ?? undefined}>
+                  <span>{balanceDisplay}</span>
+                  {isBalanceLoading && (
+                    <PiArrowClockwiseBold className="h-3 w-3 animate-spin" />
+                  )}
+                </button>
               </div>
               {balanceError && (
                 <div className="text-[10px] font-normal text-red-200">
@@ -234,21 +260,22 @@ const AppContentInner: React.FC<Props> = (props) => {
                 </div>
               )}
             </div>
-            <span
-              className="inline-flex"
-              title={refreshDisabledReason ?? undefined}>
-              <Button
-                className="h-8 px-2 text-xs"
-                outlined
-                loading={isBalanceLoading}
-                disabled={!isBalanceConfigured || isBalanceLoading}
-                onClick={() => {
-                  void refresh();
-                }}
-                rightIcon={<PiArrowClockwiseBold />}>
-                {t('common.refresh', { defaultValue: 'Refresh' })}
-              </Button>
-            </span>
+          </div>
+
+          <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center px-4 text-center">
+            <div className="pointer-events-auto">
+              {isGeneratedTitle ? (
+                <>
+                  <LazyOutputText text={getTitle(conversationId ?? '')} />
+                </>
+              ) : (
+                <>
+                  {isConversationOrNewChat
+                    ? getTitle(conversationId ?? '')
+                    : getPageLabel(pathPattern)}
+                </>
+              )}
+            </div>
           </div>
         </header>
 

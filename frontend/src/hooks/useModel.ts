@@ -3,7 +3,6 @@ import { Model } from '../@types/conversation';
 import { ModelItem } from '../@types/global-config';
 import { AVAILABLE_MODEL_KEYS } from '../constants/index';
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import useLocalStorage from './useLocalStorage';
 import useGlobalConfig from './useGlobalConfig';
 import { ActiveModels } from '../@types/bot';
@@ -73,170 +72,118 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
     }, {} as ActiveModels);
   }, [activeModels]);
 
-  const { t } = useTranslation();
   const previousBotId = usePreviousBotId(botId);
 
   const availableModels = useMemo<ModelItem[]>(() => {
     return [
       {
-        modelId: 'claude-v4-opus',
-        label: t('model.claude-v4-opus.label'),
-        description: t('model.claude-v4-opus.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: true,
-      },
-      {
-        modelId: 'claude-v4.1-opus',
-        label: t('model.claude-v4.1-opus.label'),
-        description: t('model.claude-v4.1-opus.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: true,
-      },
-      {
-        modelId: 'claude-v4-sonnet',
-        label: t('model.claude-v4-sonnet.label'),
-        description: t('model.claude-v4-sonnet.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: true,
-      },
-      {
         modelId: 'claude-v3-haiku',
-        label: t('model.claude-v3-haiku.label'),
-        description: t('model.claude-v3-haiku.description'),
+        label: 'Selira Spark (2024)',
+        description:
+          'Lightweight, lightning-fast model optimized for short answers and chat-style conversations.',
         supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
         supportReasoning: false,
       },
       {
         modelId: 'claude-v3.5-haiku',
-        label: t('model.claude-v3.5-haiku.label'),
-        description: t('model.claude-v3.5-haiku.description'),
+        label: 'Selira Spark v2 (2024)',
+        description:
+          'Enhanced version of Spark with improved reasoning and faster contextual understanding for professional use.',
         supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
         supportReasoning: false,
       },
       {
         modelId: 'claude-v3.5-sonnet',
-        label: t('model.claude-v3.5-sonnet.label'),
-        description: t('model.claude-v3.5-sonnet.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'claude-v3.5-sonnet-v2',
-        label: t('model.claude-v3.5-sonnet-v2.label'),
-        description: t('model.claude-v3.5-sonnet-v2.description'),
-        supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
-      },
-      {
-        modelId: 'claude-v3.7-sonnet',
-        label: t('model.claude-v3.7-sonnet.label'),
-        description: t('model.claude-v3.7-sonnet.description'),
+        label: 'Selira Core v2 (2024)',
+        description:
+          'Balanced model for reasoning, writing, and structured thinking — ideal for legal analysis, drafting, and summarization.',
         supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
         supportReasoning: true,
       },
       {
         modelId: 'claude-v3-opus',
-        label: t('model.claude-v3-opus.label'),
-        description: t('model.claude-v3-opus.description'),
+        label: 'Selira Prime (2024)',
+        description:
+          'High-performance reasoning model designed for complex logic, research tasks, and advanced drafting capabilities.',
         supportMediaType: CLAUDE_SUPPORTED_MEDIA_TYPES,
-        supportReasoning: false,
+        supportReasoning: true,
       },
       // New Amazon Nova models
       {
         modelId: 'amazon-nova-pro',
-        label: t('model.amazon-nova-pro.label'),
-        description: t('model.amazon-nova-pro.description'),
+        label: 'Selira Nova Pro',
+        description:
+          'Versatile multimodal AI for text, image, and structured reasoning with optimal cost-performance balance.',
         supportMediaType: NOVA_SUPPORTED_MEDIA_TYPES,
         supportReasoning: false,
       },
       {
         modelId: 'amazon-nova-lite',
-        label: t('model.amazon-nova-lite.label'),
-        description: t('model.amazon-nova-lite.description'),
+        label: 'Selira Nova Lite',
+        description:
+          'Fast and efficient model for lightweight image and text tasks, ideal for quick assistant-style use cases.',
         supportMediaType: NOVA_SUPPORTED_MEDIA_TYPES,
         supportReasoning: false,
       },
       {
         modelId: 'amazon-nova-micro',
-        label: t('model.amazon-nova-micro.label'),
-        description: t('model.amazon-nova-micro.description'),
+        label: 'Selira Nova Micro',
+        description:
+          'Ultra-low latency text-only model for quick responses and cost-sensitive applications.',
         supportMediaType: [],
         supportReasoning: false,
       },
       // DeepSeek models
       {
         modelId: 'deepseek-r1',
-        label: t('model.deepseek-r1.label'),
-        description: t('model.deepseek-r1.description'),
+        label: 'Selira DeepLogic',
+        description:
+          'Advanced reasoning model for complex problem solving, mathematics, science, and structured explanations.',
         supportMediaType: [],
         supportReasoning: true,
-        forceReasoningEnabled: true, // Deep Seek always return reasoning contents.
+        forceReasoningEnabled: true, // DeepSeek always returns reasoning content.
       },
       // Meta Llama 3 models
       {
         modelId: 'llama3-3-70b-instruct',
-        label: t('model.llama3-3-70b-instruct.label'),
-        description: t('model.llama3-3-70b-instruct.description'),
+        label: 'Selira Luma Pro (70B)',
+        description:
+          'Large-scale reasoning and generation model optimized for multilingual and professional document analysis.',
         supportMediaType: [],
         supportReasoning: false,
       },
       {
         modelId: 'llama3-2-1b-instruct',
-        label: t('model.llama3-2-1b-instruct.label'),
-        description: t('model.llama3-2-1b-instruct.description'),
+        label: 'Selira Luma Mini (1B)',
+        description:
+          'Lightweight model for on-device and mobile tasks, providing efficient natural language understanding.',
         supportMediaType: [],
         supportReasoning: false,
       },
       {
         modelId: 'llama3-2-3b-instruct',
-        label: t('model.llama3-2-3b-instruct.label'),
-        description: t('model.llama3-2-3b-instruct.description'),
+        label: 'Selira Luma Lite (3B)',
+        description:
+          'Compact, responsive model optimized for short text generation and summarization tasks.',
         supportMediaType: [],
         supportReasoning: false,
       },
       {
         modelId: 'llama3-2-11b-instruct',
-        label: t('model.llama3-2-11b-instruct.label'),
-        description: t('model.llama3-2-11b-instruct.description'),
+        label: 'Selira Luma Mid (11B)',
+        description:
+          'Powerful multimodal model capable of processing text and image inputs for smart document understanding.',
         supportMediaType: LLAMA_SUPPORTED_MEDIA_TYPES,
         supportReasoning: false,
       },
       {
         modelId: 'llama3-2-90b-instruct',
-        label: t('model.llama3-2-90b-instruct.label'),
-        description: t('model.llama3-2-90b-instruct.description'),
+        label: 'Selira Luma Ultra (90B)',
+        description:
+          'High-end multimodal model offering strong reasoning and visual understanding for enterprise-grade use cases.',
         supportMediaType: LLAMA_SUPPORTED_MEDIA_TYPES,
         supportReasoning: false,
-      },
-      // Mistral
-      {
-        modelId: 'mistral-7b-instruct',
-        label: t('model.mistral-7b-instruct.label'),
-        description: t('model.mistral-7b-instruct.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
-        modelId: 'mixtral-8x7b-instruct',
-        label: t('model.mixtral-8x7b-instruct.label'),
-        description: t('model.mixtral-8x7b-instruct.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
-        modelId: 'mistral-large',
-        label: t('model.mistral-large.label'),
-        description: t('model.mistral-large.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
-      {
-        modelId: 'mistral-large-2',
-        label: t('model.mistral-large-2.label'),
-        description: t('model.mistral-large-2.description'),
-        supportMediaType: [],
-        supportReasoning: false,
-      },
+      }
     ].filter((model) => {
       // Filter based on global configuration if available
       if (
@@ -248,7 +195,7 @@ const useModel = (botId?: string | null, activeModels?: ActiveModels) => {
       // If no global config, show all models
       return true;
     }) as ModelItem[];
-  }, [t, globalConfig]);
+  }, [globalConfig]);
 
   const [filteredModels, setFilteredModels] = useState(availableModels);
   const { modelId, setModelId } = useModelState();
